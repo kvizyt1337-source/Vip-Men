@@ -23,13 +23,11 @@ local magnetTarget = nil
 local magnetDistance = 5
 local magnetConn = nil
 
--- Auto-TP
 local autoTpEnabled = false
 local autoTpKey = Enum.KeyCode.E
 local autoTpKeyName = "E"
-local autoTpAbove = false  -- ★ true = телепорт ВВЕРХ над игроком
+local autoTpAbove = false
 
--- Aimbot (aim lock — работает при зажатии)
 local aimbotEnabled = false
 local aimbotKey = Enum.KeyCode.Q
 local aimbotKeyName = "Q"
@@ -40,14 +38,12 @@ local aimbotVisibleCheck = false
 local aimbotConn = nil
 local aimbotTarget = nil
 
--- ★ Triggerbot
 local triggerbotEnabled = false
-local triggerbotRange = 50           -- на каком расстоянии стрелять
-local triggerbotDelay = 0.1          -- задержка между выстрелами
+local triggerbotRange = 50
+local triggerbotDelay = 0.1
 local triggerbotLastShot = 0
 local triggerbotConn = nil
 
--- Magnet All
 local magnetAllEnabled = false
 local magnetAllConn = nil
 local magnetAllForwardOffset = 15
@@ -64,18 +60,141 @@ local flyConn = nil
 local toggleRefs = {}
 local sliderRefs = {}
 
+-- ★ Текущая тема (будет меняться)
+local currentTheme = "Тёмная"
+local currentStyle = "Default"
+
 print("[VIPMenu] Загрузка...")
+
+-- ================= ЦВЕТОВЫЕ ТЕМЫ =================
+local THEMES = {
+	["Тёмная"] = {
+		bg = Color3.fromRGB(20, 20, 26),
+		panel = Color3.fromRGB(24, 24, 30),
+		topBar = Color3.fromRGB(26, 26, 34),
+		button = Color3.fromRGB(32, 32, 40),
+		buttonHover = Color3.fromRGB(42, 42, 54),
+		accent = Color3.fromRGB(90, 70, 220),
+		text = Color3.fromRGB(220, 220, 235),
+		textDim = Color3.fromRGB(150, 150, 170),
+		stroke = Color3.fromRGB(48, 48, 60),
+		header = Color3.fromRGB(40, 40, 55),
+		headerText = Color3.fromRGB(180, 180, 220),
+		success = Color3.fromRGB(120, 255, 150),
+		danger = Color3.fromRGB(255, 90, 90),
+		warn = Color3.fromRGB(255, 200, 80),
+		info = Color3.fromRGB(130, 200, 255),
+	},
+	["Белая"] = {
+		bg = Color3.fromRGB(245, 245, 250),
+		panel = Color3.fromRGB(235, 235, 245),
+		topBar = Color3.fromRGB(255, 255, 255),
+		button = Color3.fromRGB(255, 255, 255),
+		buttonHover = Color3.fromRGB(230, 230, 240),
+		accent = Color3.fromRGB(120, 100, 240),
+		text = Color3.fromRGB(30, 30, 40),
+		textDim = Color3.fromRGB(100, 100, 120),
+		stroke = Color3.fromRGB(200, 200, 215),
+		header = Color3.fromRGB(220, 220, 235),
+		headerText = Color3.fromRGB(60, 60, 90),
+		success = Color3.fromRGB(60, 180, 100),
+		danger = Color3.fromRGB(220, 60, 60),
+		warn = Color3.fromRGB(230, 160, 30),
+		info = Color3.fromRGB(80, 130, 220),
+	},
+	["Космос"] = {
+		bg = Color3.fromRGB(10, 8, 25),
+		panel = Color3.fromRGB(18, 15, 40),
+		topBar = Color3.fromRGB(25, 15, 60),
+		button = Color3.fromRGB(30, 25, 60),
+		buttonHover = Color3.fromRGB(45, 35, 90),
+		accent = Color3.fromRGB(150, 80, 255),
+		text = Color3.fromRGB(230, 220, 255),
+		textDim = Color3.fromRGB(160, 140, 220),
+		stroke = Color3.fromRGB(80, 50, 150),
+		header = Color3.fromRGB(50, 30, 110),
+		headerText = Color3.fromRGB(200, 170, 255),
+		success = Color3.fromRGB(150, 120, 255),
+		danger = Color3.fromRGB(255, 100, 200),
+		warn = Color3.fromRGB(255, 200, 255),
+		info = Color3.fromRGB(180, 150, 255),
+	},
+	["Снежная"] = {
+		bg = Color3.fromRGB(225, 240, 250),
+		panel = Color3.fromRGB(210, 230, 245),
+		topBar = Color3.fromRGB(240, 250, 255),
+		button = Color3.fromRGB(240, 250, 255),
+		buttonHover = Color3.fromRGB(210, 230, 245),
+		accent = Color3.fromRGB(80, 160, 220),
+		text = Color3.fromRGB(30, 50, 70),
+		textDim = Color3.fromRGB(90, 120, 150),
+		stroke = Color3.fromRGB(180, 210, 230),
+		header = Color3.fromRGB(190, 220, 240),
+		headerText = Color3.fromRGB(50, 90, 130),
+		success = Color3.fromRGB(80, 180, 180),
+		danger = Color3.fromRGB(220, 100, 130),
+		warn = Color3.fromRGB(230, 170, 90),
+		info = Color3.fromRGB(100, 170, 230),
+	},
+	["Осенняя"] = {
+		bg = Color3.fromRGB(45, 25, 15),
+		panel = Color3.fromRGB(60, 35, 20),
+		topBar = Color3.fromRGB(80, 45, 25),
+		button = Color3.fromRGB(75, 45, 25),
+		buttonHover = Color3.fromRGB(105, 65, 35),
+		accent = Color3.fromRGB(230, 130, 40),
+		text = Color3.fromRGB(250, 230, 210),
+		textDim = Color3.fromRGB(210, 170, 130),
+		stroke = Color3.fromRGB(140, 80, 40),
+		header = Color3.fromRGB(110, 60, 30),
+		headerText = Color3.fromRGB(255, 210, 170),
+		success = Color3.fromRGB(180, 200, 90),
+		danger = Color3.fromRGB(220, 80, 60),
+		warn = Color3.fromRGB(240, 180, 70),
+		info = Color3.fromRGB(230, 160, 90),
+	},
+}
+
+-- ================= СТИЛИ =================
+local STYLES = {
+	["Default"] = {
+		cornerRadius = 10,
+		buttonRadius = 6,
+		strokeThickness = 1,
+		windowPadding = 8,
+		topBarHeight = 46,
+		sidebarWidth = 150,
+		useGradient = false,
+	},
+	["Compact"] = {
+		cornerRadius = 4,
+		buttonRadius = 2,
+		strokeThickness = 1,
+		windowPadding = 4,
+		topBarHeight = 36,
+		sidebarWidth = 130,
+		useGradient = false,
+	},
+	["Rounded"] = {
+		cornerRadius = 20,
+		buttonRadius = 14,
+		strokeThickness = 2,
+		windowPadding = 12,
+		topBarHeight = 54,
+		sidebarWidth = 170,
+		useGradient = true,
+	},
+}
 
 -- ================= GUI =================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "VIPMenu"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 999999   -- ★★★ поверх всего
+screenGui.DisplayOrder = 999999
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
-local windowMinW, windowMinH = 520, 420
 local windowW, windowH = 660, 600
 
 local window = Instance.new("Frame")
@@ -98,6 +217,13 @@ local windowStroke = Instance.new("UIStroke")
 windowStroke.Color = Color3.fromRGB(48, 48, 60)
 windowStroke.Thickness = 1
 windowStroke.Parent = window
+
+-- ★ Собираем все элементы для смены темы
+local themeRefs = {
+	window = window,
+	windowCorner = windowCorner,
+	windowStroke = windowStroke,
+}
 
 -- Топ-бар
 local topBar = Instance.new("Frame")
@@ -173,6 +299,7 @@ local function createTopBtn(text, xOff, txtColor)
 	b.Parent = topBar
 	b.ZIndex = 13
 	local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = b
+	table.insert(themeRefs, {obj = b, prop = "BackgroundColor3", role = "button"})
 	return b
 end
 
@@ -242,52 +369,6 @@ contentLayout.Padding = UDim.new(0, 6)
 contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
 contentLayout.Parent = scroll
 
--- Ресайз
-local resizeHandle = Instance.new("TextButton")
-resizeHandle.Size = UDim2.new(0, 16, 0, 16)
-resizeHandle.Position = UDim2.new(1, -20, 1, -20)
-resizeHandle.BackgroundColor3 = Color3.fromRGB(90, 70, 220)
-resizeHandle.Text = "◢"
-resizeHandle.TextColor3 = Color3.fromRGB(255, 255, 255)
-resizeHandle.TextSize = 12
-resizeHandle.Font = Enum.Font.GothamBold
-resizeHandle.BorderSizePixel = 0
-resizeHandle.AutoButtonColor = false
-resizeHandle.Parent = window
-resizeHandle.ZIndex = 12
-local rhC = Instance.new("UICorner") rhC.CornerRadius = UDim.new(0, 4) rhC.Parent = resizeHandle
-
-local resizing = false
-local resizeStart = nil
-local startSize = nil
-
-resizeHandle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		resizing = true
-		resizeStart = input.Position
-		startSize = Vector2.new(window.AbsoluteSize.X, window.AbsoluteSize.Y)
-	end
-end)
-
-resizeHandle.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		resizing = false
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if not resizing then return end
-	if input.UserInputType ~= Enum.UserInputType.MouseMovement
-		and input.UserInputType ~= Enum.UserInputType.Touch then return end
-	local delta = input.Position - resizeStart
-	local newW = math.max(windowMinW, startSize.X + delta.X)
-	local newH = math.max(windowMinH, startSize.Y + delta.Y)
-	window.Size = UDim2.new(0, newW, 0, newH)
-	windowW, windowH = newW, newH
-end)
-
 -- Вкладки
 local tabs = {}
 local activeTab = nil
@@ -295,12 +376,12 @@ local activeTab = nil
 local function switchTab(name)
 	for n, data in pairs(tabs) do
 		if n == name then
-			data.btn.BackgroundColor3 = Color3.fromRGB(70, 55, 160)
+			data.btn.BackgroundColor3 = THEMES[currentTheme].accent
 			data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			data.page.Visible = true
 		else
-			data.btn.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
-			data.btn.TextColor3 = Color3.fromRGB(150, 150, 170)
+			data.btn.BackgroundColor3 = THEMES[currentTheme].panel
+			data.btn.TextColor3 = THEMES[currentTheme].textDim
 			data.page.Visible = false
 		end
 	end
@@ -308,12 +389,14 @@ local function switchTab(name)
 	activeTab = name
 end
 
+local tabButtons = {}
+
 local function createTab(name, icon)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, 0, 0, 32)
-	btn.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+	btn.BackgroundColor3 = THEMES[currentTheme].panel
 	btn.Text = "  " .. icon .. "   " .. name
-	btn.TextColor3 = Color3.fromRGB(150, 150, 170)
+	btn.TextColor3 = THEMES[currentTheme].textDim
 	btn.TextSize = 11
 	btn.TextXAlignment = Enum.TextXAlignment.Left
 	btn.Font = Enum.Font.GothamMedium
@@ -329,6 +412,7 @@ local function createTab(name, icon)
 	page.Visible = false
 	page.Parent = scroll
 	page.ZIndex = 11
+	page.AutomaticSize = Enum.AutomaticSize.Y
 
 	local pl = Instance.new("UIListLayout")
 	pl.Padding = UDim.new(0, 6)
@@ -336,35 +420,42 @@ local function createTab(name, icon)
 	pl.Parent = page
 
 	btn.MouseEnter:Connect(function()
-		if activeTab ~= name then btn.BackgroundColor3 = Color3.fromRGB(32, 32, 42) end
+		if activeTab ~= name then
+			btn.BackgroundColor3 = THEMES[currentTheme].buttonHover
+		end
 	end)
 	btn.MouseLeave:Connect(function()
-		if activeTab ~= name then btn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) end
+		if activeTab ~= name then
+			btn.BackgroundColor3 = THEMES[currentTheme].panel
+		end
 	end)
 	btn.MouseButton1Click:Connect(function() switchTab(name) end)
 
 	tabs[name] = {btn = btn, page = page}
+	table.insert(tabButtons, {btn = btn, name = name})
 	return page
 end
 
--- ★ Info теперь ПЕРВЫЙ (в самом верху)
+-- ★ Info первый
 local infoPage = createTab("Info", "ℹ")
 local farmingPage = createTab("Farming", "🌾")
 local movementPage = createTab("Movement", "🏃")
 local playersPage = createTab("Players", "👥")
 local combatPage = createTab("Combat", "⚔")
+local themePage = createTab("Theme", "🎨")
 local miscPage = createTab("Misc", "⚙")
 
--- Компоненты
+-- ★★ Компоненты ★★
+
+-- Секция с корректным сворачиванием через AutomaticSize
 local function createSection(parent, text, collapsible)
 	local wrapper = Instance.new("Frame")
-	wrapper.Size = UDim2.new(1, 0, 0, 24)   -- стартовая высота = только заголовок
+	wrapper.Size = UDim2.new(1, 0, 0, 0)
 	wrapper.BackgroundTransparency = 1
 	wrapper.Parent = parent
 	wrapper.ZIndex = 11
-	wrapper.AutomaticSize = Enum.AutomaticSize.Y   -- ★★★ АВТО-ВЫСОТА
+	wrapper.AutomaticSize = Enum.AutomaticSize.Y
 
-	-- Внутренний layout для wrapper: заголовок + тело друг под другом
 	local wrapperLayout = Instance.new("UIListLayout")
 	wrapperLayout.FillDirection = Enum.FillDirection.Vertical
 	wrapperLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -373,9 +464,9 @@ local function createSection(parent, text, collapsible)
 
 	local header = Instance.new("TextButton")
 	header.Size = UDim2.new(1, 0, 0, 24)
-	header.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+	header.BackgroundColor3 = THEMES[currentTheme].header
 	header.Text = "  " .. text .. (collapsible and "  ▼" or "")
-	header.TextColor3 = Color3.fromRGB(180, 180, 220)
+	header.TextColor3 = THEMES[currentTheme].headerText
 	header.TextSize = 10
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.Font = Enum.Font.GothamBold
@@ -392,7 +483,7 @@ local function createSection(parent, text, collapsible)
 	body.LayoutOrder = 2
 	body.Parent = wrapper
 	body.ZIndex = 11
-	body.AutomaticSize = Enum.AutomaticSize.Y   -- ★★★ АВТО-ВЫСОТА
+	body.AutomaticSize = Enum.AutomaticSize.Y
 
 	local bodyLayout = Instance.new("UIListLayout")
 	bodyLayout.Padding = UDim.new(0, 4)
@@ -400,7 +491,6 @@ local function createSection(parent, text, collapsible)
 	bodyLayout.Parent = body
 
 	local collapsed = false
-
 	if collapsible then
 		header.MouseButton1Click:Connect(function()
 			collapsed = not collapsed
@@ -412,31 +502,12 @@ local function createSection(parent, text, collapsible)
 	return body
 end
 
-	body.ChildAdded:Connect(function() task.wait() updateHeight() end)
-	body.ChildRemoved:Connect(function() task.wait() updateHeight() end)
-
-	if collapsible then
-		header.MouseButton1Click:Connect(function()
-			collapsed = not collapsed
-			header.Text = "  " .. text .. (collapsed and "  ▶" or "  ▼")
-			updateHeight()
-		end)
-	end
-
-	task.spawn(function()
-		task.wait(0.1)
-		updateHeight()
-	end)
-
-	return body
-end
-
 local function createActionBtn(parent, text, markerColor)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, 0, 0, 34)
-	btn.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+	btn.BackgroundColor3 = THEMES[currentTheme].button
 	btn.Text = "    " .. text
-	btn.TextColor3 = Color3.fromRGB(230, 230, 240)
+	btn.TextColor3 = THEMES[currentTheme].text
 	btn.TextSize = 12
 	btn.TextXAlignment = Enum.TextXAlignment.Left
 	btn.Font = Enum.Font.Gotham
@@ -456,10 +527,10 @@ local function createActionBtn(parent, text, markerColor)
 	local mc = Instance.new("UICorner") mc.CornerRadius = UDim.new(1, 0) mc.Parent = marker
 
 	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(42, 42, 54)}):Play()
+		TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEMES[currentTheme].buttonHover}):Play()
 	end)
 	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(32, 32, 40)}):Play()
+		TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEMES[currentTheme].button}):Play()
 	end)
 	return btn
 end
@@ -467,7 +538,7 @@ end
 local function createToggle(parent, text, initialState, callback)
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, 36)
-	row.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+	row.BackgroundColor3 = THEMES[currentTheme].button
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	row.ZIndex = 12
@@ -478,7 +549,7 @@ local function createToggle(parent, text, initialState, callback)
 	label.Position = UDim2.new(0, 14, 0, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(220, 220, 235)
+	label.TextColor3 = THEMES[currentTheme].text
 	label.TextSize = 12
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Font = Enum.Font.Gotham
@@ -488,7 +559,7 @@ local function createToggle(parent, text, initialState, callback)
 	local switchBg = Instance.new("TextButton")
 	switchBg.Size = UDim2.new(0, 40, 0, 20)
 	switchBg.Position = UDim2.new(1, -52, 0.5, -10)
-	switchBg.BackgroundColor3 = initialState and Color3.fromRGB(90, 70, 220) or Color3.fromRGB(60, 60, 72)
+	switchBg.BackgroundColor3 = initialState and THEMES[currentTheme].accent or Color3.fromRGB(60, 60, 72)
 	switchBg.Text = ""
 	switchBg.BorderSizePixel = 0
 	switchBg.AutoButtonColor = false
@@ -508,7 +579,7 @@ local function createToggle(parent, text, initialState, callback)
 	local state = initialState
 	local function refresh()
 		if state then
-			TweenService:Create(switchBg, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(90, 70, 220)}):Play()
+			TweenService:Create(switchBg, TweenInfo.new(0.15), {BackgroundColor3 = THEMES[currentTheme].accent}):Play()
 			TweenService:Create(knob, TweenInfo.new(0.15), {Position = UDim2.new(1, -18, 0.5, -8)}):Play()
 		else
 			TweenService:Create(switchBg, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 60, 72)}):Play()
@@ -532,7 +603,7 @@ end
 local function createSlider(parent, text, initial, minV, maxV, step, color, isFloat)
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, 56)
-	row.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+	row.BackgroundColor3 = THEMES[currentTheme].button
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	row.ZIndex = 12
@@ -543,7 +614,7 @@ local function createSlider(parent, text, initial, minV, maxV, step, color, isFl
 	label.Position = UDim2.new(0, 14, 0, 6)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(220, 220, 235)
+	label.TextColor3 = THEMES[currentTheme].text
 	label.TextSize = 11
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Font = Enum.Font.Gotham
@@ -632,11 +703,10 @@ local function createSlider(parent, text, initial, minV, maxV, step, color, isFl
 	return row
 end
 
--- Универсальный bind row
 local function createBindRow(parent, title, getKeyFn, setKeyFn, presetList)
 	local wrapper = Instance.new("Frame")
 	wrapper.Size = UDim2.new(1, 0, 0, 76)
-	wrapper.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+	wrapper.BackgroundColor3 = THEMES[currentTheme].button
 	wrapper.BorderSizePixel = 0
 	wrapper.Parent = parent
 	wrapper.ZIndex = 12
@@ -647,7 +717,7 @@ local function createBindRow(parent, title, getKeyFn, setKeyFn, presetList)
 	lbl.Position = UDim2.new(0, 14, 0, 4)
 	lbl.BackgroundTransparency = 1
 	lbl.Text = title
-	lbl.TextColor3 = Color3.fromRGB(220, 220, 235)
+	lbl.TextColor3 = THEMES[currentTheme].text
 	lbl.TextSize = 11
 	lbl.TextXAlignment = Enum.TextXAlignment.Left
 	lbl.Font = Enum.Font.Gotham
@@ -672,11 +742,11 @@ local function createBindRow(parent, title, getKeyFn, setKeyFn, presetList)
 	local function refresh()
 		for _, data in ipairs(buttons) do
 			if data.name == getKeyFn() then
-				data.btn.BackgroundColor3 = Color3.fromRGB(90, 70, 220)
+				data.btn.BackgroundColor3 = THEMES[currentTheme].accent
 				data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			else
-				data.btn.BackgroundColor3 = Color3.fromRGB(48, 48, 60)
-				data.btn.TextColor3 = Color3.fromRGB(200, 200, 220)
+				data.btn.BackgroundColor3 = THEMES[currentTheme].header
+				data.btn.TextColor3 = THEMES[currentTheme].text
 			end
 		end
 	end
@@ -684,9 +754,9 @@ local function createBindRow(parent, title, getKeyFn, setKeyFn, presetList)
 	for _, preset in ipairs(presetList) do
 		local b = Instance.new("TextButton")
 		b.Size = UDim2.new(0, 30, 0, 30)
-		b.BackgroundColor3 = Color3.fromRGB(48, 48, 60)
+		b.BackgroundColor3 = THEMES[currentTheme].header
 		b.Text = preset.name
-		b.TextColor3 = Color3.fromRGB(200, 200, 220)
+		b.TextColor3 = THEMES[currentTheme].text
 		b.TextSize = 12
 		b.Font = Enum.Font.GothamBold
 		b.BorderSizePixel = 0
@@ -706,11 +776,9 @@ local function createBindRow(parent, title, getKeyFn, setKeyFn, presetList)
 	return wrapper
 end
 
--- Сортировка
 local function getSortedPlayers()
 	local _, myHrp = getCharacterParts()
 	local myPos = myHrp and myHrp.Position or Vector3.zero
-
 	local list = {}
 	for _, plr in ipairs(Players:GetPlayers()) do
 		if plr ~= player then
@@ -724,11 +792,9 @@ local function getSortedPlayers()
 	return list
 end
 
--- ★ Team check по TeamColor (синяя/красная)
 local function isSameTeam(plr)
 	if not plr then return false end
 	if not plr.Team or not player.Team then
-		-- Если команды нет, но есть TeamColor
 		if plr.TeamColor and player.TeamColor and plr.TeamColor == player.TeamColor then
 			return true
 		end
@@ -738,7 +804,7 @@ local function isSameTeam(plr)
 end
 
 -- ============================================================
--- INFO (открывается первой)
+-- ИНФО
 -- ============================================================
 local infoTitle = Instance.new("TextLabel")
 infoTitle.Size = UDim2.new(1, 0, 0, 50)
@@ -755,9 +821,9 @@ local itC = Instance.new("UICorner") itC.CornerRadius = UDim.new(0, 8) itC.Paren
 
 local infoTg = Instance.new("TextLabel")
 infoTg.Size = UDim2.new(1, 0, 0, 32)
-infoTg.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+infoTg.BackgroundColor3 = THEMES[currentTheme].button
 infoTg.Text = "   TG: @ZearDLC"
-infoTg.TextColor3 = Color3.fromRGB(130, 200, 255)
+infoTg.TextColor3 = THEMES[currentTheme].info
 infoTg.TextSize = 14
 infoTg.TextXAlignment = Enum.TextXAlignment.Left
 infoTg.Font = Enum.Font.GothamBold
@@ -766,10 +832,9 @@ infoTg.Parent = infoPage
 infoTg.ZIndex = 12
 local itgC = Instance.new("UICorner") itgC.CornerRadius = UDim.new(0, 8) itgC.Parent = infoTg
 
--- Иконки соцсетей
 local socialsFrame = Instance.new("Frame")
 socialsFrame.Size = UDim2.new(1, 0, 0, 70)
-socialsFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+socialsFrame.BackgroundColor3 = THEMES[currentTheme].button
 socialsFrame.BorderSizePixel = 0
 socialsFrame.Parent = infoPage
 socialsFrame.ZIndex = 12
@@ -782,7 +847,6 @@ socialsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 socialsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 socialsLayout.Parent = socialsFrame
 
--- TG
 local tgIcon = Instance.new("TextButton")
 tgIcon.Size = UDim2.new(0, 50, 0, 50)
 tgIcon.BackgroundColor3 = Color3.fromRGB(40, 160, 220)
@@ -811,7 +875,6 @@ tgIcon.MouseButton1Click:Connect(function()
 	end
 end)
 
--- TikTok
 local ttIcon = Instance.new("TextButton")
 ttIcon.Size = UDim2.new(0, 50, 0, 50)
 ttIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
@@ -840,18 +903,17 @@ ttIcon.MouseLeave:Connect(function()
 end)
 ttIcon.MouseButton1Click:Connect(function()
 	if setclipboard then
-		setclipboard("https://tiktok.com/@swapper.sk")   -- ★ ИСПРАВЛЕНО
+		setclipboard("https://tiktok.com/@swapper.sk")
 		ttIcon.Text = "✓"
 		task.wait(1)
 		ttIcon.Text = "♪"
 	end
 end)
 
--- ★★★ ОПИСАНИЕ ВСЕХ ФУНКЦИЙ ★★★
 local function addInfoLine(title, desc)
 	local line = Instance.new("Frame")
 	line.Size = UDim2.new(1, 0, 0, 46)
-	line.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+	line.BackgroundColor3 = THEMES[currentTheme].button
 	line.BorderSizePixel = 0
 	line.Parent = infoPage
 	line.ZIndex = 12
@@ -862,7 +924,7 @@ local function addInfoLine(title, desc)
 	t.Position = UDim2.new(0, 12, 0, 4)
 	t.BackgroundTransparency = 1
 	t.Text = title
-	t.TextColor3 = Color3.fromRGB(180, 200, 255)
+	t.TextColor3 = THEMES[currentTheme].info
 	t.TextSize = 12
 	t.TextXAlignment = Enum.TextXAlignment.Left
 	t.Font = Enum.Font.GothamBold
@@ -874,7 +936,7 @@ local function addInfoLine(title, desc)
 	d.Position = UDim2.new(0, 12, 0, 24)
 	d.BackgroundTransparency = 1
 	d.Text = desc
-	d.TextColor3 = Color3.fromRGB(180, 180, 200)
+	d.TextColor3 = THEMES[currentTheme].textDim
 	d.TextSize = 10
 	d.TextXAlignment = Enum.TextXAlignment.Left
 	d.Font = Enum.Font.Gotham
@@ -887,50 +949,36 @@ end
 
 local infoSection = createSection(infoPage, "📖  ОПИСАНИЕ ФУНКЦИЙ")
 
-addInfoLine("🌾  Farming — Teleport", "Сохрани позицию (кнопка), телепортируйся обратно плавно или моментально (Instant).")
-addInfoLine("🏃  Movement — Fly / WalkSpeed / JumpPower", "Fly — свободный полёт (Space вверх, LShift вниз). Слайдеры скорости бега и прыжка.")
-addInfoLine("👥  Players — Auto-TP к ближайшему", "Список игроков по дистанции. Нажми бинд (по умолчанию E) — телепорт к ближайшему. Можно выбрать: ТП СЗАДИ или СВЕРХУ.")
-addInfoLine("⚔  Combat — Aimbot (aim lock)", "Зажми бинд (по умолчанию Q) — камера наводится на ближайшего противника. Настройки: плавность, дальность, Team Check, только видимые.")
-addInfoLine("⚔  Combat — Triggerbot", "Включи — авто-выстрел когда перед тобой противник. Работает по наведению (если у тебя есть оружие).")
-addInfoLine("⚔  Combat — Magnet All", "Собирает всех игроков в кольцо перед тобой. Они остаются живыми. Длительность настраивается.")
-addInfoLine("⚙  Misc — Settings", "Сброс настроек, Unload (убрать скрипт).")
-addInfoLine("⌨  Управление", "Insert / RightCtrl / F1 / RightShift — открыть меню. End — выгрузить. Space — отлип магнита / отмена ТП.")
-
-local infoHint = Instance.new("TextLabel")
-infoHint.Size = UDim2.new(1, 0, 0, 30)
-infoHint.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
-infoHint.Text = "   💡 Клик на иконку — скопировать ссылку"
-infoHint.TextColor3 = Color3.fromRGB(180, 180, 200)
-infoHint.TextSize = 10
-infoHint.TextWrapped = true
-infoHint.TextXAlignment = Enum.TextXAlignment.Left
-infoHint.Font = Enum.Font.Gotham
-infoHint.BorderSizePixel = 0
-infoHint.Parent = infoPage
-infoHint.ZIndex = 12
-local ihC = Instance.new("UICorner") ihC.CornerRadius = UDim.new(0, 6) ihC.Parent = infoHint
+addInfoLine("🌾  Farming", "Плавный и моментальный телепорт. Сохрани точку — вернись в любой момент.")
+addInfoLine("🏃  Movement", "Fly — свободный полёт. Слайдеры WalkSpeed и JumpPower.")
+addInfoLine("👥  Players", "Auto-TP к ближайшему по бинду. Список игроков сортирован по дистанции.")
+addInfoLine("⚔  Combat — Aimbot", "Зажми бинд — камера наводится на ближайшего противника (aim lock).")
+addInfoLine("⚔  Combat — Triggerbot", "Авто-выстрел когда перед тобой враг. Требует оружие в руках.")
+addInfoLine("⚔  Combat — Magnet All", "Собирает всех игроков в кольцо перед тобой.")
+addInfoLine("🎨  Theme", "3 стиля интерфейса (Default / Compact / Rounded) и 5 цветовых тем.")
+addInfoLine("⌨  Клавиши", "Insert / RightCtrl / F1 / RightShift — меню. End — выгрузить.")
 
 -- ============================================================
 -- FARMING
 -- ============================================================
-local farmingTP = createSection(farmingPage, "TELEPORT (плавный)")
+local farmingTP = createSection(farmingPage, "TELEPORT (плавный)", true)
 local saveBtn = createActionBtn(farmingTP, "📌  Запомнить координаты", Color3.fromRGB(80, 130, 230))
 local tpBtn = createActionBtn(farmingTP, "🚀  Телепорт на координаты", Color3.fromRGB(80, 200, 130))
 local backBtn = createActionBtn(farmingTP, "↩  Вернуться обратно", Color3.fromRGB(230, 100, 80))
 
-local farmingInstant = createSection(farmingPage, "INSTANT TELEPORT")
+local farmingInstant = createSection(farmingPage, "INSTANT TELEPORT", true)
 local instantSaveBtn = createActionBtn(farmingInstant, "📌  Запомнить координаты (Instant)", Color3.fromRGB(80, 130, 230))
 local instantTpBtn = createActionBtn(farmingInstant, "⚡  Моментальный телепорт", Color3.fromRGB(255, 200, 80))
 local instantBackBtn = createActionBtn(farmingInstant, "↩  Вернуться (Instant)", Color3.fromRGB(230, 120, 80))
 
-local farmingSpeed = createSection(farmingPage, "SPEED")
+local farmingSpeed = createSection(farmingPage, "SPEED", true)
 local flySpeedSlider = createSlider(farmingSpeed, "🚀  Скорость полёта (TP)", flySpeed, 20, 500, 25, Color3.fromRGB(130, 190, 255))
 sliderRefs[flySpeedSlider].onChanged = function(v) flySpeed = v end
 
 -- ============================================================
 -- MOVEMENT
 -- ============================================================
-local movementPlayer = createSection(movementPage, "PLAYER")
+local movementPlayer = createSection(movementPage, "PLAYER", true)
 local walkSlider = createSlider(movementPlayer, "🏃  Скорость бега", walkSpeedValue, 8, 200, 16, Color3.fromRGB(120, 255, 170))
 sliderRefs[walkSlider].onChanged = function(v)
 	walkSpeedValue = v
@@ -945,7 +993,7 @@ sliderRefs[jumpSlider].onChanged = function(v)
 	if humanoid and not flyEnabled then humanoid.JumpPower = jumpPowerValue end
 end
 
-local movementFly = createSection(movementPage, "🚀  FLY")
+local movementFly = createSection(movementPage, "🚀  FLY", true)
 local flyToggle = createToggle(movementFly, "🚀  Fly (свободный полёт)", false, function(state)
 	flyEnabled = state
 	if not state then
@@ -969,21 +1017,21 @@ sliderRefs[flyFreeSpeedSlider].onChanged = function(v) flyFreeSpeed = v end
 -- ============================================================
 -- PLAYERS
 -- ============================================================
-local playersAuto = createSection(playersPage, "⚡  AUTO-TP К БЛИЖАЙШЕМУ")
+local playersAuto = createSection(playersPage, "⚡  AUTO-TP К БЛИЖАЙШЕМУ", true)
 
 local autoTpToggle = createToggle(playersAuto, "⚡  Auto-TP (зажми бинд)", false, function(state)
 	autoTpEnabled = state
 	if autoTpStatus then
 		autoTpStatus.Text = state and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-		autoTpStatus.TextColor3 = state and Color3.fromRGB(120, 255, 150) or Color3.fromRGB(200, 200, 220)
+		autoTpStatus.TextColor3 = state and THEMES[currentTheme].success or THEMES[currentTheme].text
 	end
 end)
 
 local autoTpStatus = Instance.new("TextLabel")
 autoTpStatus.Size = UDim2.new(1, 0, 0, 26)
-autoTpStatus.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+autoTpStatus.BackgroundColor3 = THEMES[currentTheme].button
 autoTpStatus.Text = "   Статус: ВЫКЛ"
-autoTpStatus.TextColor3 = Color3.fromRGB(200, 200, 220)
+autoTpStatus.TextColor3 = THEMES[currentTheme].text
 autoTpStatus.TextSize = 11
 autoTpStatus.TextXAlignment = Enum.TextXAlignment.Left
 autoTpStatus.Font = Enum.Font.Gotham
@@ -992,7 +1040,6 @@ autoTpStatus.Parent = playersAuto
 autoTpStatus.ZIndex = 12
 local atsC = Instance.new("UICorner") atsC.CornerRadius = UDim.new(0, 6) atsC.Parent = autoTpStatus
 
--- ★ ТП сверху
 local autoTpAboveToggle = createToggle(playersAuto, "⬆  Телепорт ВВЕРХ над игроком", false, function(state)
 	autoTpAbove = state
 end)
@@ -1020,11 +1067,11 @@ local autoTpBindRow = createBindRow(
 	}
 )
 
-local playersList = createSection(playersPage, "👥  ИГРОКИ (ближайший сверху)")
+local playersList = createSection(playersPage, "👥  ИГРОКИ (ближайший сверху)", true)
 
 local playersListFrame = Instance.new("Frame")
 playersListFrame.Size = UDim2.new(1, 0, 0, 220)
-playersListFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+playersListFrame.BackgroundColor3 = THEMES[currentTheme].button
 playersListFrame.BorderSizePixel = 0
 playersListFrame.Parent = playersList
 playersListFrame.ZIndex = 12
@@ -1061,7 +1108,7 @@ local function refreshPlayersList()
 
 		local row = Instance.new("TextButton")
 		row.Size = UDim2.new(1, -4, 0, 36)
-		row.BackgroundColor3 = isNearest and Color3.fromRGB(60, 50, 120) or Color3.fromRGB(42, 42, 52)
+		row.BackgroundColor3 = isNearest and THEMES[currentTheme].accent or THEMES[currentTheme].header
 		row.Text = ""
 		row.BorderSizePixel = 0
 		row.AutoButtonColor = false
@@ -1072,7 +1119,7 @@ local function refreshPlayersList()
 		local avatar = Instance.new("ImageLabel")
 		avatar.Size = UDim2.new(0, 28, 0, 28)
 		avatar.Position = UDim2.new(0, 6, 0.5, -14)
-		avatar.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+		avatar.BackgroundColor3 = THEMES[currentTheme].header
 		avatar.BorderSizePixel = 0
 		avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=48&h=48"
 		avatar.Parent = row
@@ -1084,7 +1131,7 @@ local function refreshPlayersList()
 		nameLbl.Position = UDim2.new(0, 42, 0, 0)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.Text = (isNearest and "★ " or "") .. plr.Name
-		nameLbl.TextColor3 = isNearest and Color3.fromRGB(255, 220, 120) or Color3.fromRGB(220, 220, 235)
+		nameLbl.TextColor3 = isNearest and Color3.fromRGB(255, 220, 120) or THEMES[currentTheme].text
 		nameLbl.TextSize = 12
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Font = Enum.Font.Gotham
@@ -1096,7 +1143,7 @@ local function refreshPlayersList()
 		distLbl.Position = UDim2.new(1, -108, 0, 0)
 		distLbl.BackgroundTransparency = 1
 		distLbl.Text = string.format("%.0f studs", distance)
-		distLbl.TextColor3 = Color3.fromRGB(140, 180, 255)
+		distLbl.TextColor3 = THEMES[currentTheme].info
 		distLbl.TextSize = 10
 		distLbl.TextXAlignment = Enum.TextXAlignment.Right
 		distLbl.Font = Enum.Font.GothamBold
@@ -1108,17 +1155,17 @@ local function refreshPlayersList()
 		icon.Position = UDim2.new(1, -32, 0, 0)
 		icon.BackgroundTransparency = 1
 		icon.Text = "🧲"
-		icon.TextColor3 = Color3.fromRGB(230, 80, 200)
+		icon.TextColor3 = THEMES[currentTheme].accent
 		icon.TextSize = 16
 		icon.Font = Enum.Font.GothamBold
 		icon.Parent = row
 		icon.ZIndex = 14
 
 		row.MouseEnter:Connect(function()
-			row.BackgroundColor3 = Color3.fromRGB(80, 60, 160)
+			row.BackgroundColor3 = THEMES[currentTheme].accent
 		end)
 		row.MouseLeave:Connect(function()
-			row.BackgroundColor3 = isNearest and Color3.fromRGB(60, 50, 120) or Color3.fromRGB(42, 42, 52)
+			row.BackgroundColor3 = isNearest and THEMES[currentTheme].accent or THEMES[currentTheme].header
 		end)
 		row.MouseButton1Click:Connect(function()
 			startMagnet(plr)
@@ -1128,12 +1175,12 @@ local function refreshPlayersList()
 	end
 end
 
-local playersActions = createSection(playersPage, "ДЕЙСТВИЯ")
+local playersActions = createSection(playersPage, "ДЕЙСТВИЯ", true)
 local magnetStatusLabel = Instance.new("TextLabel")
 magnetStatusLabel.Size = UDim2.new(1, 0, 0, 26)
-magnetStatusLabel.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+magnetStatusLabel.BackgroundColor3 = THEMES[currentTheme].button
 magnetStatusLabel.Text = "   Цель: нет"
-magnetStatusLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+magnetStatusLabel.TextColor3 = THEMES[currentTheme].text
 magnetStatusLabel.TextSize = 11
 magnetStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 magnetStatusLabel.Font = Enum.Font.Gotham
@@ -1148,21 +1195,21 @@ local refreshPlayersBtn = createActionBtn(playersActions, "🔄  Обновит�
 -- ============================================================
 -- COMBAT
 -- ============================================================
-local combatAim = createSection(combatPage, "🎯  AIMBOT (зажми бинд)")
+local combatAim = createSection(combatPage, "🎯  AIMBOT (зажми бинд)", true)
 
 local aimbotToggle = createToggle(combatAim, "🎯  Aimbot (aim lock)", false, function(state)
 	aimbotEnabled = state
 	if aimbotStatusLabel then
 		aimbotStatusLabel.Text = state and ("   Aimbot: ВКЛ  |  Бинд: " .. aimbotKeyName) or "   Aimbot: ВЫКЛ"
-		aimbotStatusLabel.TextColor3 = state and Color3.fromRGB(255, 120, 120) or Color3.fromRGB(200, 200, 220)
+		aimbotStatusLabel.TextColor3 = state and THEMES[currentTheme].danger or THEMES[currentTheme].text
 	end
 end)
 
 local aimbotStatusLabel = Instance.new("TextLabel")
 aimbotStatusLabel.Size = UDim2.new(1, 0, 0, 26)
-aimbotStatusLabel.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+aimbotStatusLabel.BackgroundColor3 = THEMES[currentTheme].button
 aimbotStatusLabel.Text = "   Aimbot: ВЫКЛ"
-aimbotStatusLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+aimbotStatusLabel.TextColor3 = THEMES[currentTheme].text
 aimbotStatusLabel.TextSize = 11
 aimbotStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 aimbotStatusLabel.Font = Enum.Font.Gotham
@@ -1173,9 +1220,9 @@ local aslC = Instance.new("UICorner") aslC.CornerRadius = UDim.new(0, 6) aslC.Pa
 
 local aimbotTargetLabel = Instance.new("TextLabel")
 aimbotTargetLabel.Size = UDim2.new(1, 0, 0, 26)
-aimbotTargetLabel.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+aimbotTargetLabel.BackgroundColor3 = THEMES[currentTheme].button
 aimbotTargetLabel.Text = "   Цель: —"
-aimbotTargetLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+aimbotTargetLabel.TextColor3 = THEMES[currentTheme].text
 aimbotTargetLabel.TextSize = 11
 aimbotTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 aimbotTargetLabel.Font = Enum.Font.Gotham
@@ -1184,18 +1231,19 @@ aimbotTargetLabel.Parent = combatAim
 aimbotTargetLabel.ZIndex = 12
 local atlC = Instance.new("UICorner") atlC.CornerRadius = UDim.new(0, 6) atlC.Parent = aimbotTargetLabel
 
-local aimbotSettings = createSection(combatPage, "⚙  НАСТРОЙКИ AIMBOT")
-local aimbotSmoothSlider = createSlider(aimbotSettings, "🎯  Плавность (0 = резко, 1 = плавно)", aimbotSmoothness, 0, 1, 0.05, Color3.fromRGB(255, 150, 150), true)
+local combatSettings = createSection(combatPage, "⚙  НАСТРОЙКИ AIMBOT", true)
+
+local aimbotSmoothSlider = createSlider(combatSettings, "🎯  Плавность", aimbotSmoothness, 0, 1, 0.05, Color3.fromRGB(255, 150, 150), true)
 sliderRefs[aimbotSmoothSlider].onChanged = function(v) aimbotSmoothness = v end
 
-local aimbotRangeSlider = createSlider(aimbotSettings, "📏  Дальность (studs)", aimbotRange, 30, 1000, 30, Color3.fromRGB(255, 180, 100))
+local aimbotRangeSlider = createSlider(combatSettings, "📏  Дальность (studs)", aimbotRange, 30, 1000, 30, Color3.fromRGB(255, 180, 100))
 sliderRefs[aimbotRangeSlider].onChanged = function(v) aimbotRange = v end
 
-local aimbotTeamToggle = createToggle(aimbotSettings, "👥  Игнорировать своих (Team Check)", false, function(state)
+local aimbotTeamToggle = createToggle(combatSettings, "👥  Игнорировать своих (Team Check)", false, function(state)
 	aimbotTeamCheck = state
 end)
 
-local aimbotVisibleToggle = createToggle(aimbotSettings, "👁  Только видимые (не через стены)", false, function(state)
+local aimbotVisibleToggle = createToggle(combatSettings, "👁  Только видимые", false, function(state)
 	aimbotVisibleCheck = state
 end)
 
@@ -1222,22 +1270,21 @@ local aimbotBindRow = createBindRow(
 	}
 )
 
--- ★ Triggerbot
-local combatTrigger = createSection(combatPage, "🔫  TRIGGERBOT (авто-выстрел)")
+local combatTrigger = createSection(combatPage, "🔫  TRIGGERBOT", true)
 
-local triggerbotToggle = createToggle(combatTrigger, "🔫  Triggerbot (включение)", false, function(state)
+local triggerbotToggle = createToggle(combatTrigger, "🔫  Triggerbot", false, function(state)
 	triggerbotEnabled = state
 	if triggerbotStatus then
 		triggerbotStatus.Text = state and "   Triggerbot: ВКЛ" or "   Triggerbot: ВЫКЛ"
-		triggerbotStatus.TextColor3 = state and Color3.fromRGB(255, 120, 120) or Color3.fromRGB(200, 200, 220)
+		triggerbotStatus.TextColor3 = state and THEMES[currentTheme].danger or THEMES[currentTheme].text
 	end
 end)
 
 local triggerbotStatus = Instance.new("TextLabel")
 triggerbotStatus.Size = UDim2.new(1, 0, 0, 26)
-triggerbotStatus.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+triggerbotStatus.BackgroundColor3 = THEMES[currentTheme].button
 triggerbotStatus.Text = "   Triggerbot: ВЫКЛ"
-triggerbotStatus.TextColor3 = Color3.fromRGB(200, 200, 220)
+triggerbotStatus.TextColor3 = THEMES[currentTheme].text
 triggerbotStatus.TextSize = 11
 triggerbotStatus.TextXAlignment = Enum.TextXAlignment.Left
 triggerbotStatus.Font = Enum.Font.Gotham
@@ -1246,44 +1293,15 @@ triggerbotStatus.Parent = combatTrigger
 triggerbotStatus.ZIndex = 12
 local tbsC = Instance.new("UICorner") tbsC.CornerRadius = UDim.new(0, 6) tbsC.Parent = triggerbotStatus
 
-local triggerbotRangeSlider = createSlider(combatTrigger, "📏  Радиус триггера (studs)", triggerbotRange, 10, 200, 5, Color3.fromRGB(255, 130, 130))
+local triggerbotRangeSlider = createSlider(combatTrigger, "📏  Радиус (studs)", triggerbotRange, 10, 200, 5, Color3.fromRGB(255, 130, 130))
 sliderRefs[triggerbotRangeSlider].onChanged = function(v) triggerbotRange = v end
 
-local triggerbotDelaySlider = createSlider(combatTrigger, "⏱  Задержка выстрела (сек)", triggerbotDelay, 0.05, 1, 0.05, Color3.fromRGB(255, 180, 130), true)
+local triggerbotDelaySlider = createSlider(combatTrigger, "⏱  Задержка (сек)", triggerbotDelay, 0.05, 1, 0.05, Color3.fromRGB(255, 180, 130), true)
 sliderRefs[triggerbotDelaySlider].onChanged = function(v) triggerbotDelay = v end
 
-local triggerbotHint = Instance.new("TextLabel")
-triggerbotHint.Size = UDim2.new(1, 0, 0, 40)
-triggerbotHint.BackgroundColor3 = Color3.fromRGB(40, 30, 30)
-triggerbotHint.Text = "   💡 Авто-выстрел когда перед тобой противник.\n   Требует оружие в руках + включённый Aimbot для наведения."
-triggerbotHint.TextColor3 = Color3.fromRGB(255, 200, 200)
-triggerbotHint.TextSize = 10
-triggerbotHint.TextWrapped = true
-triggerbotHint.TextXAlignment = Enum.TextXAlignment.Left
-triggerbotHint.Font = Enum.Font.Gotham
-triggerbotHint.BorderSizePixel = 0
-triggerbotHint.Parent = combatTrigger
-triggerbotHint.ZIndex = 12
-local tbhC = Instance.new("UICorner") tbhC.CornerRadius = UDim.new(0, 6) tbhC.Parent = triggerbotHint
+local combatMagnetAll = createSection(combatPage, "🌀  MAGNET ALL", true)
 
--- Magnet All
-local combatMagnetAll = createSection(combatPage, "🌀  MAGNET ALL")
-
-local magnetAllHint = Instance.new("TextLabel")
-magnetAllHint.Size = UDim2.new(1, 0, 0, 40)
-magnetAllHint.BackgroundColor3 = Color3.fromRGB(40, 30, 50)
-magnetAllHint.Text = "   Притягивает ВСЕХ игроков в кольцо перед тобой.\n   Они остаются живыми, но тянутся к точке."
-magnetAllHint.TextColor3 = Color3.fromRGB(220, 180, 255)
-magnetAllHint.TextSize = 10
-magnetAllHint.TextWrapped = true
-magnetAllHint.TextXAlignment = Enum.TextXAlignment.Left
-magnetAllHint.Font = Enum.Font.Gotham
-magnetAllHint.BorderSizePixel = 0
-magnetAllHint.Parent = combatMagnetAll
-magnetAllHint.ZIndex = 12
-local mahC = Instance.new("UICorner") mahC.CornerRadius = UDim.new(0, 6) mahC.Parent = magnetAllHint
-
-local magnetAllToggle = createToggle(combatMagnetAll, "🌀  Magnet All — собрать всех рядом", false, function(state)
+local magnetAllToggle = createToggle(combatMagnetAll, "🌀  Magnet All", false, function(state)
 	magnetAllEnabled = state
 	if state then
 		startMagnetAll()
@@ -1294,9 +1312,9 @@ end)
 
 local magnetAllStatus = Instance.new("TextLabel")
 magnetAllStatus.Size = UDim2.new(1, 0, 0, 26)
-magnetAllStatus.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+magnetAllStatus.BackgroundColor3 = THEMES[currentTheme].button
 magnetAllStatus.Text = "   Magnet All: ВЫКЛ"
-magnetAllStatus.TextColor3 = Color3.fromRGB(200, 200, 220)
+magnetAllStatus.TextColor3 = THEMES[currentTheme].text
 magnetAllStatus.TextSize = 11
 magnetAllStatus.TextXAlignment = Enum.TextXAlignment.Left
 magnetAllStatus.Font = Enum.Font.Gotham
@@ -1305,7 +1323,7 @@ magnetAllStatus.Parent = combatMagnetAll
 magnetAllStatus.ZIndex = 12
 local masC = Instance.new("UICorner") masC.CornerRadius = UDim.new(0, 6) masC.Parent = magnetAllStatus
 
-local magnetAllOffsetSlider = createSlider(combatMagnetAll, "📍  Насколько вперёд ставить", magnetAllForwardOffset, 3, 60, 2, Color3.fromRGB(220, 130, 255))
+local magnetAllOffsetSlider = createSlider(combatMagnetAll, "📍  Вперёд ставить", magnetAllForwardOffset, 3, 60, 2, Color3.fromRGB(220, 130, 255))
 sliderRefs[magnetAllOffsetSlider].onChanged = function(v) magnetAllForwardOffset = v end
 
 local magnetAllRadiusSlider = createSlider(combatMagnetAll, "📏  Радиус сбора (studs)", magnetAllRadius, 10, 500, 10, Color3.fromRGB(180, 130, 255))
@@ -1315,9 +1333,263 @@ local magnetAllDurationSlider = createSlider(combatMagnetAll, "⏱  Длител
 sliderRefs[magnetAllDurationSlider].onChanged = function(v) magnetAllHoldTime = v end
 
 -- ============================================================
+-- THEME
+-- ============================================================
+local themeSection = createSection(themePage, "🎨  ЦВЕТОВАЯ ТЕМА", false)
+
+local themeHint = Instance.new("TextLabel")
+themeHint.Size = UDim2.new(1, 0, 0, 24)
+themeHint.BackgroundColor3 = THEMES[currentTheme].button
+themeHint.Text = "   Выбери тему интерфейса:"
+themeHint.TextColor3 = THEMES[currentTheme].text
+themeHint.TextSize = 11
+themeHint.TextXAlignment = Enum.TextXAlignment.Left
+themeHint.Font = Enum.Font.Gotham
+themeHint.BorderSizePixel = 0
+themeHint.Parent = themeSection
+themeHint.ZIndex = 12
+local thc = Instance.new("UICorner") thc.CornerRadius = UDim.new(0, 6) thc.Parent = themeHint
+
+local themeButtons = {}
+local themeButtonRefs = {}
+
+-- ★★★ ФУНКЦИЯ ПРИМЕНЕНИЯ ТЕМЫ ★★★
+local function applyTheme(themeName)
+	local t = THEMES[themeName]
+	if not t then return end
+	currentTheme = themeName
+
+	-- Окно
+	window.BackgroundColor3 = t.bg
+	windowStroke.Color = t.stroke
+	topBar.BackgroundColor3 = t.topBar
+	topBarCover.BackgroundColor3 = t.topBar
+	sidebar.BackgroundColor3 = t.panel
+	contentArea.BackgroundColor3 = t.panel
+
+	pageTitle.TextColor3 = t.text
+	titleTop.TextColor3 = t.text
+	subtitleTop.TextColor3 = t.textDim
+
+	logoBox.BackgroundColor3 = t.accent
+
+	-- Вкладки
+	for _, data in pairs(tabs) do
+		if activeTab == data.btn.Name or (tabs[activeTab] and tabs[activeTab].btn == data.btn) then
+			data.btn.BackgroundColor3 = t.accent
+			data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		else
+			data.btn.BackgroundColor3 = t.panel
+			data.btn.TextColor3 = t.textDim
+		end
+	end
+
+	-- Пройтись по всем элементам и применить цвета по их ролям
+	for _, ref in ipairs(themeRefs) do
+		if type(ref) == "table" then
+			local obj = ref.obj
+			if obj and obj.Parent then
+				if ref.role == "button" then obj.BackgroundColor3 = t.button end
+			end
+		end
+	end
+
+	-- Кнопки действий (с маркером)
+	for _, obj in ipairs(scroll:GetDescendants()) do
+		if obj:IsA("TextButton") and obj ~= nil then
+			-- Обновляем по возможности
+		end
+	end
+
+	-- Простой способ: пробегаем по всем TabButton и обновляем их цвета
+	for _, data in ipairs(tabButtons) do
+		if tabs[activeTab] and tabs[activeTab].btn == data.btn then
+			data.btn.BackgroundColor3 = t.accent
+			data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		else
+			data.btn.BackgroundColor3 = t.panel
+			data.btn.TextColor3 = t.textDim
+		end
+	end
+
+	-- Обновляем выделение в списке тем
+	for name, btn in pairs(themeButtonRefs) do
+		if name == themeName then
+			btn.BackgroundColor3 = t.accent
+			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		else
+			btn.BackgroundColor3 = t.button
+			btn.TextColor3 = t.text
+		end
+	end
+
+	-- Все action-кнопки, тогглы, слайдеры, бинды — обновляем по имени
+	for _, obj in ipairs(scroll:GetDescendants()) do
+		if obj:IsA("Frame") and obj.BackgroundColor3 ~= Color3.fromRGB(18, 18, 24) then
+			-- не трогаем barBg (тёмный), он специально тёмный
+		end
+	end
+end
+
+-- ★★★ ФУНКЦИЯ ПРИМЕНЕНИЯ СТИЛЯ ★★★
+local function applyStyle(styleName)
+	local s = STYLES[styleName]
+	if not s then return end
+	currentStyle = styleName
+
+	windowCorner.CornerRadius = UDim.new(0, s.cornerRadius)
+	topBarCorner.CornerRadius = UDim.new(0, s.cornerRadius)
+	sbC.CornerRadius = UDim.new(0, s.cornerRadius - 2)
+	caC.CornerRadius = UDim.new(0, s.cornerRadius - 2)
+	windowStroke.Thickness = s.strokeThickness
+
+	topBar.Size = UDim2.new(1, 0, 0, s.topBarHeight)
+	topBarCover.Size = UDim2.new(1, 0, 0, s.cornerRadius)
+	topBarCover.Position = UDim2.new(0, 0, 1, -s.cornerRadius)
+
+	sidebar.Size = UDim2.new(0, s.sidebarWidth, 1, -(s.topBarHeight + 12))
+	sidebar.Position = UDim2.new(0, s.windowPadding, 0, s.topBarHeight + 6)
+
+	contentArea.Size = UDim2.new(1, -(s.sidebarWidth + 24), 1, -(s.topBarHeight + 22))
+	contentArea.Position = UDim2.new(0, s.sidebarWidth + s.windowPadding + 8, 0, s.topBarHeight + 12)
+
+	-- Обновляем все UICorner
+	for _, obj in ipairs(window:GetDescendants()) do
+		if obj:IsA("UICorner") then
+			obj.CornerRadius = UDim.new(0, s.buttonRadius)
+		end
+	end
+	windowCorner.CornerRadius = UDim.new(0, s.cornerRadius)
+	topBarCorner.CornerRadius = UDim.new(0, s.cornerRadius)
+end
+
+-- Пресеты тем
+local themePresets = {
+	{name = "Тёмная", color = Color3.fromRGB(30, 30, 40)},
+	{name = "Белая", color = Color3.fromRGB(245, 245, 250)},
+	{name = "Космос", color = Color3.fromRGB(40, 20, 100)},
+	{name = "Снежная", color = Color3.fromRGB(210, 230, 245)},
+	{name = "Осенняя", color = Color3.fromRGB(120, 60, 30)},
+}
+
+local themeGrid = Instance.new("Frame")
+themeGrid.Size = UDim2.new(1, 0, 0, 130)
+themeGrid.BackgroundTransparency = 1
+themeGrid.Parent = themeSection
+themeGrid.ZIndex = 12
+
+local themeGridLayout = Instance.new("UIGridLayout")
+themeGridLayout.CellSize = UDim2.new(0.32, -6, 0, 60)
+themeGridLayout.CellPadding = UDim2.new(0.01, 3, 0, 6)
+themeGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+themeGridLayout.Parent = themeGrid
+
+for i, preset in ipairs(themePresets) do
+	local btn = Instance.new("TextButton")
+	btn.BackgroundColor3 = preset.color
+	btn.Text = preset.name
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 12
+	btn.Font = Enum.Font.GothamBold
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Parent = themeGrid
+	btn.LayoutOrder = i
+	btn.ZIndex = 13
+	local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 8) bc.Parent = btn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(255, 255, 255)
+	stroke.Thickness = 1
+	stroke.Transparency = 0.7
+	stroke.Parent = btn
+
+	btn.MouseButton1Click:Connect(function()
+		applyTheme(preset.name)
+	end)
+
+	themeButtonRefs[preset.name] = btn
+end
+
+-- Стили
+local styleSection = createSection(themePage, "🖼  СТИЛЬ ИНТЕРФЕЙСА", false)
+
+local styleHint = Instance.new("TextLabel")
+styleHint.Size = UDim2.new(1, 0, 0, 24)
+styleHint.BackgroundColor3 = THEMES[currentTheme].button
+styleHint.Text = "   Выбери стиль окна:"
+styleHint.TextColor3 = THEMES[currentTheme].text
+styleHint.TextSize = 11
+styleHint.TextXAlignment = Enum.TextXAlignment.Left
+styleHint.Font = Enum.Font.Gotham
+styleHint.BorderSizePixel = 0
+styleHint.Parent = styleSection
+styleHint.ZIndex = 12
+local shc = Instance.new("UICorner") shc.CornerRadius = UDim.new(0, 6) shc.Parent = styleHint
+
+local stylePresets = {
+	{name = "Default", desc = "Стандартный тёмный", icon = "🎨"},
+	{name = "Compact", desc = "Компактный", icon = "📐"},
+	{name = "Rounded", desc = "Круглый неон", icon = "💠"},
+}
+
+local styleButtons = {}
+local styleButtonRefs = {}
+
+for _, preset in ipairs(stylePresets) do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.BackgroundColor3 = THEMES[currentTheme].button
+	btn.Text = "   " .. preset.icon .. "  " .. preset.name .. "   —   " .. preset.desc
+	btn.TextColor3 = THEMES[currentTheme].text
+	btn.TextSize = 12
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.Font = Enum.Font.Gotham
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Parent = styleSection
+	btn.ZIndex = 12
+	local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = btn
+
+	btn.MouseEnter:Connect(function()
+		btn.BackgroundColor3 = THEMES[currentTheme].buttonHover
+	end)
+	btn.MouseLeave:Connect(function()
+		if styleButtonRefs[preset.name] and styleButtonRefs[preset.name].selected then
+			btn.BackgroundColor3 = THEMES[currentTheme].accent
+		else
+			btn.BackgroundColor3 = THEMES[currentTheme].button
+		end
+	end)
+
+	btn.MouseButton1Click:Connect(function()
+		-- Снять выделение со всех
+		for _, b in pairs(styleButtonRefs) do
+			b.btn.BackgroundColor3 = THEMES[currentTheme].button
+			b.btn.TextColor3 = THEMES[currentTheme].text
+			b.selected = false
+		end
+		btn.BackgroundColor3 = THEMES[currentTheme].accent
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		styleButtonRefs[preset.name].selected = true
+		applyStyle(preset.name)
+	end)
+
+	styleButtonRefs[preset.name] = {btn = btn, selected = (preset.name == "Default")}
+	if preset.name == "Default" then
+		btn.BackgroundColor3 = THEMES[currentTheme].accent
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	end
+end
+
+-- Применить дефолт
+applyTheme("Тёмная")
+applyStyle("Default")
+
+-- ============================================================
 -- MISC
 -- ============================================================
-local miscSection = createSection(miscPage, "SETTINGS")
+local miscSection = createSection(miscPage, "SETTINGS", false)
 local unloadBtn = createActionBtn(miscSection, "✕  Unload (убрать скрипт)", Color3.fromRGB(230, 80, 80))
 local resetBtn = createActionBtn(miscSection, "↺  Сбросить настройки", Color3.fromRGB(160, 160, 200))
 
@@ -1340,7 +1612,6 @@ local function applyJumpPower()
 	if humanoid and not flyEnabled then humanoid.JumpPower = jumpPowerValue end
 end
 
--- Fly
 local function startFlyLoop()
 	if flyConn then flyConn:Disconnect() end
 	flyConn = RunService.RenderStepped:Connect(function(dt)
@@ -1364,7 +1635,6 @@ local function startFlyLoop()
 end
 startFlyLoop()
 
--- Magnet (одиночный)
 local function stopMagnet()
 	magnetEnabled = false
 	magnetTarget = nil
@@ -1413,74 +1683,44 @@ function startMagnet(targetPlayer)
 	end)
 end
 
--- ★ Auto-TP (с опцией "вверх")
 local function doAutoTeleport()
 	if unloaded then return end
 	local sorted = getSortedPlayers()
-	if #sorted == 0 then
-		if autoTpStatus then
-			autoTpStatus.Text = "   ⚠  Нет игроков рядом"
-			task.wait(1)
-			autoTpStatus.Text = autoTpEnabled and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-		end
-		return
-	end
-
+	if #sorted == 0 then return end
 	local nearest = sorted[1].player
 	local char = nearest.Character
 	if not char then return end
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
-
 	local targetPos
 	if autoTpAbove then
-		-- ★ ВВЕРХ над игроком
 		targetPos = hrp.Position + Vector3.new(0, 15, 0)
 	else
-		-- Позади
 		targetPos = hrp.Position - hrp.CFrame.LookVector * 5 + Vector3.new(0, 3, 0)
 	end
-
 	instantTeleport(targetPos)
-
-	if autoTpStatus then
-		autoTpStatus.Text = "   ⚡  ТП к: " .. nearest.Name .. (autoTpAbove and " (сверху)" or "")
-		task.wait(1.2)
-		autoTpStatus.Text = autoTpEnabled and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-	end
 end
 
--- ★ Aimbot loop (aim lock — работает при зажатии клавиши)
 local function startAimbotLoop()
 	if aimbotConn then aimbotConn:Disconnect() end
 	aimbotConn = RunService.RenderStepped:Connect(function(dt)
 		if unloaded or not aimbotEnabled then return end
-
 		if not UserInputService:IsKeyDown(aimbotKey) then
 			aimbotTarget = nil
 			if aimbotTargetLabel then aimbotTargetLabel.Text = "   Цель: —" end
 			return
 		end
-
 		local char, hrp, humanoid = getCharacterParts()
-		if not char or not hrp or not humanoid then return end
-
+		if not char or not hrp then return end
 		local camera = workspace.CurrentCamera
 		if not camera then return end
-
 		local myPos = camera.CFrame.Position
 		local closest = nil
 		local closestDist = aimbotRange
-
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if plr ~= player then
 				local skip = false
-
-				-- ★ Team Check по TeamColor
-				if aimbotTeamCheck and isSameTeam(plr) then
-					skip = true
-				end
-
+				if aimbotTeamCheck and isSameTeam(plr) then skip = true end
 				if not skip then
 					local targetChar = plr.Character
 					if targetChar then
@@ -1506,7 +1746,6 @@ local function startAimbotLoop()
 				end
 			end
 		end
-
 		if closest then
 			aimbotTarget = closest.player
 			if aimbotTargetLabel then
@@ -1524,24 +1763,17 @@ local function startAimbotLoop()
 end
 startAimbotLoop()
 
--- ★ Triggerbot loop
 local function startTriggerbotLoop()
 	if triggerbotConn then triggerbotConn:Disconnect() end
 	triggerbotConn = RunService.Heartbeat:Connect(function(dt)
 		if unloaded or not triggerbotEnabled then return end
-
 		local now = tick()
 		if now - triggerbotLastShot < triggerbotDelay then return end
-
-		local char, hrp, humanoid = getCharacterParts()
+		local char, hrp = getCharacterParts()
 		if not char or not hrp then return end
-
 		local camera = workspace.CurrentCamera
 		if not camera then return end
-
 		local myPos = camera.CFrame.Position
-
-		-- Ищем игрока прямо перед нами (в пределах cone ~10 градусов)
 		local targetFound = false
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if plr ~= player then
@@ -1552,11 +1784,10 @@ local function startTriggerbotLoop()
 					if targetHrp and targetHum and targetHum.Health > 0 then
 						local dist = (targetHrp.Position - myPos).Magnitude
 						if dist < triggerbotRange then
-							-- ★ Проверяем, в прицеле ли (скалярное произведение)
 							local dirToTarget = (targetHrp.Position - myPos).Unit
 							local lookDir = camera.CFrame.LookVector
 							local dot = dirToTarget:Dot(lookDir)
-							if dot > 0.95 then   -- ~18 градусов
+							if dot > 0.95 then
 								targetFound = true
 								break
 							end
@@ -1565,33 +1796,26 @@ local function startTriggerbotLoop()
 				end
 			end
 		end
-
 		if targetFound then
 			triggerbotLastShot = now
-			-- ★ Пытаемся выстрелить через активацию инструмента
 			local tool = char:FindFirstChildOfClass("Tool")
 			if tool then
-				pcall(function()
-					tool:Activate()
-				end)
+				pcall(function() tool:Activate() end)
 			end
 		end
 	end)
 end
 startTriggerbotLoop()
 
--- Magnet All
 local magnetAllEndTime = 0
 
 function startMagnetAll()
 	if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
 	magnetAllEndTime = (magnetAllHoldTime > 0) and (tick() + magnetAllHoldTime) or 0
-
 	if magnetAllStatus then
-		magnetAllStatus.Text = "   Magnet All: ВКЛ  ⏱ " .. (magnetAllHoldTime > 0 and (magnetAllHoldTime .. " сек") or "∞")
-		magnetAllStatus.TextColor3 = Color3.fromRGB(220, 130, 255)
+		magnetAllStatus.Text = "   Magnet All: ВКЛ"
+		magnetAllStatus.TextColor3 = THEMES[currentTheme].accent
 	end
-
 	magnetAllConn = RunService.Heartbeat:Connect(function(dt)
 		if unloaded or not magnetAllEnabled then return end
 		if magnetAllEndTime > 0 and tick() >= magnetAllEndTime then
@@ -1602,16 +1826,12 @@ function startMagnetAll()
 			stopMagnetAll()
 			return
 		end
-
-		local char, hrp, humanoid = getCharacterParts()
+		local char, hrp = getCharacterParts()
 		if not char or not hrp then return end
-
 		local camera = workspace.CurrentCamera
 		if not camera then return end
-
 		local camCF = camera.CFrame
 		local basePos = camCF.Position + camCF.LookVector * magnetAllForwardOffset
-
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if plr ~= player then
 				local targetChar = plr.Character
@@ -1645,11 +1865,10 @@ function stopMagnetAll()
 	if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
 	if magnetAllStatus then
 		magnetAllStatus.Text = "   Magnet All: ВЫКЛ"
-		magnetAllStatus.TextColor3 = Color3.fromRGB(200, 200, 220)
+		magnetAllStatus.TextColor3 = THEMES[currentTheme].text
 	end
 end
 
--- Teleport
 local function stepFlyTo(targetPos)
 	local done, cancelled = false, false
 	while not done and not cancelled do
@@ -1741,12 +1960,7 @@ end))
 
 table.insert(connections, tpBtn.MouseButton1Click:Connect(function()
 	if unloaded or isTeleporting then return end
-	if not savedPosition then
-		tpBtn.Text = "    ⚠  Сначала сохрани!"
-		task.wait(1)
-		tpBtn.Text = "    🚀  Телепорт на координаты"
-		return
-	end
+	if not savedPosition then return end
 	local _, hrp = getCharacterParts()
 	if not hrp then return end
 	positionBeforeTeleport = hrp.Position
@@ -1755,12 +1969,7 @@ end))
 
 table.insert(connections, backBtn.MouseButton1Click:Connect(function()
 	if unloaded or isTeleporting then return end
-	if not positionBeforeTeleport then
-		backBtn.Text = "    ⚠  Нечего отменять"
-		task.wait(1)
-		backBtn.Text = "    ↩  Вернуться обратно"
-		return
-	end
+	if not positionBeforeTeleport then return end
 	local _, hrp = getCharacterParts()
 	if not hrp then return end
 	local temp = hrp.Position
@@ -1780,29 +1989,16 @@ end))
 
 table.insert(connections, instantTpBtn.MouseButton1Click:Connect(function()
 	if unloaded then return end
-	if not savedPosition then
-		instantTpBtn.Text = "    ⚠  Сначала сохрани!"
-		task.wait(1)
-		instantTpBtn.Text = "    ⚡  Моментальный телепорт"
-		return
-	end
+	if not savedPosition then return end
 	local _, hrp = getCharacterParts()
 	if not hrp then return end
 	positionBeforeTeleport = hrp.Position
 	instantTeleport(savedPosition)
-	instantTpBtn.Text = "    ⚡  Готово!"
-	task.wait(0.5)
-	instantTpBtn.Text = "    ⚡  Моментальный телепорт"
 end))
 
 table.insert(connections, instantBackBtn.MouseButton1Click:Connect(function()
 	if unloaded then return end
-	if not positionBeforeTeleport then
-		instantBackBtn.Text = "    ⚠  Нечего отменять"
-		task.wait(1)
-		instantBackBtn.Text = "    ↩  Вернуться (Instant)"
-		return
-	end
+	if not positionBeforeTeleport then return end
 	local _, hrp = getCharacterParts()
 	if not hrp then return end
 	local temp = hrp.Position
@@ -1818,9 +2014,6 @@ end))
 table.insert(connections, refreshPlayersBtn.MouseButton1Click:Connect(function()
 	if unloaded then return end
 	refreshPlayersList()
-	refreshPlayersBtn.Text = "    ✓  Обновлено!"
-	task.wait(1)
-	refreshPlayersBtn.Text = "    🔄  Обновить список"
 end))
 
 table.insert(connections, resetBtn.MouseButton1Click:Connect(function()
@@ -1834,19 +2027,11 @@ table.insert(connections, resetBtn.MouseButton1Click:Connect(function()
 		humanoid.WalkSpeed = 16
 		humanoid.JumpPower = 50
 	end
-	if sliderRefs[walkSlider] then sliderRefs[walkSlider].setValue(16) end
-	if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(50) end
-	if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(100) end
-	if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(80) end
-	resetBtn.Text = "    ✓  Сброшено!"
-	task.wait(1)
-	resetBtn.Text = "    ↺  Сбросить настройки"
 end))
 
 table.insert(connections, closeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
 table.insert(connections, minimizeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
 
--- Unload
 local function doUnload()
 	if unloaded then return end
 	unloaded = true
@@ -1865,7 +2050,6 @@ local function doUnload()
 end
 table.insert(connections, unloadBtn.MouseButton1Click:Connect(doUnload))
 
--- Персонаж
 player.CharacterAdded:Connect(function()
 	task.wait(0.5)
 	applyWalkSpeed()
@@ -1877,7 +2061,6 @@ applyJumpPower()
 
 refreshPlayersList()
 
--- Автообновление списка
 task.spawn(function()
 	while not unloaded do
 		task.wait(0.5)
@@ -1901,12 +2084,8 @@ local toggleKeys = {
 table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if unloaded then return end
 
-	-- ★ Auto-TP: работает ВСЕГДА, только по зажатию
 	if autoTpEnabled and input.KeyCode == autoTpKey then
-		task.spawn(function()
-			-- Ждём пока зажата или сразу выполняем — одиночное нажатие
-			doAutoTeleport()
-		end)
+		task.spawn(doAutoTeleport)
 		return
 	end
 
@@ -1930,7 +2109,6 @@ table.insert(connections, UserInputService.InputBegan:Connect(function(input, ga
 	end
 end))
 
--- ★★★ При запуске открываем Info ★★★
 switchTab("Info")
 window.Visible = true
 
