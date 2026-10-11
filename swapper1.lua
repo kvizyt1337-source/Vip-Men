@@ -1,6 +1,8 @@
 -- LocalScript → StarterPlayer → StarterPlayerScripts
 
-task.spawn(function()
+-- ★ pcall для перехвата ошибок
+local _ok, _err = pcall(function()
+
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
 	local TweenService = game:GetService("TweenService")
@@ -116,8 +118,7 @@ task.spawn(function()
 	local function saveConfig()
 		if not hasFileAPI then return false end
 		ensureFolder()
-		local ok, err = pcall(function() writefile(configPath(), serializeConfig()) end)
-		if not ok then warn("[VIPMenu] saveConfig: " .. tostring(err)) end
+		local ok = pcall(function() writefile(configPath(), serializeConfig()) end)
 		return ok
 	end
 
@@ -605,7 +606,8 @@ task.spawn(function()
 	local themePage = createTab("Theme", "🎨")
 	local miscPage = createTab("Misc", "⚙")
 
-	-- Компоненты
+	-- ===== Компоненты =====
+
 	local function createSection(parent, text, collapsible)
 		local wrapper = Instance.new("Frame")
 		wrapper.Size = UDim2.new(1, 0, 0, 0)
@@ -948,6 +950,12 @@ task.spawn(function()
 		return wrapper
 	end
 
+	function getCharacterParts()
+		local char = player.Character
+		if not char then return nil, nil, nil end
+		return char, char:FindFirstChild("HumanoidRootPart"), char:FindFirstChildOfClass("Humanoid")
+	end
+
 	local function getSortedPlayers()
 		local _, myHrp = getCharacterParts()
 		local myPos = myHrp and myHrp.Position or Vector3.zero
@@ -1036,12 +1044,6 @@ task.spawn(function()
 	tgIcon.ZIndex = 13
 	local tgiC = Instance.new("UICorner") tgiC.CornerRadius = UDim.new(1, 0) tgiC.Parent = tgIcon
 
-	tgIcon.MouseEnter:Connect(function()
-		TweenService:Create(tgIcon, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 180, 240)}):Play()
-	end)
-	tgIcon.MouseLeave:Connect(function()
-		TweenService:Create(tgIcon, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40, 160, 220)}):Play()
-	end)
 	tgIcon.MouseButton1Click:Connect(function()
 		print("[VIPMenu] Telegram: https://t.me/ZearDLC")
 		tgIcon.Text = "✓"
@@ -1067,14 +1069,6 @@ task.spawn(function()
 	ttStroke.Thickness = 2
 	ttStroke.Parent = ttIcon
 
-	ttIcon.MouseEnter:Connect(function()
-		TweenService:Create(ttIcon, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
-		ttStroke.Color = Color3.fromRGB(60, 240, 220)
-	end)
-	ttIcon.MouseLeave:Connect(function()
-		TweenService:Create(ttIcon, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 36)}):Play()
-		ttStroke.Color = Color3.fromRGB(255, 60, 100)
-	end)
 	ttIcon.MouseButton1Click:Connect(function()
 		print("[VIPMenu] TikTok: https://tiktok.com/@swapper.sk")
 		ttIcon.Text = "✓"
@@ -1105,7 +1099,6 @@ task.spawn(function()
 		t.Font = Enum.Font.GothamBold
 		t.Parent = line
 		t.ZIndex = 13
-		registerThemeTarget(t, "info")
 
 		local d = Instance.new("TextLabel")
 		d.Size = UDim2.new(1, -16, 0, 20)
@@ -1119,43 +1112,41 @@ task.spawn(function()
 		d.TextWrapped = true
 		d.Parent = line
 		d.ZIndex = 13
-		registerThemeTarget(d, "textDim")
 
 		return line
 	end
 
-	addInfoLine("🌾  Farming", "Плавный и моментальный телепорт на сохранённые координаты.")
-	addInfoLine("🏃  Movement", "Fly — свободный полёт. WalkSpeed, JumpPower — слайдеры.")
-	addInfoLine("👥  Players", "Auto-TP к ближайшему по бинду. Список по дистанции.")
-	addInfoLine("⚔  Combat — Aimbot", "Зажми бинд — камера наводится на врага (aim lock).")
+	addInfoLine("🌾  Farming", "Плавный и моментальный телепорт.")
+	addInfoLine("🏃  Movement", "Fly, WalkSpeed, JumpPower.")
+	addInfoLine("👥  Players", "Auto-TP к ближайшему по бинду.")
+	addInfoLine("⚔  Combat — Aimbot", "Aim lock по зажатию бинда.")
 	addInfoLine("⚔  Combat — Triggerbot", "Авто-выстрел когда перед тобой враг.")
-	addInfoLine("⚔  Combat — Magnet All", "Собирает всех игроков в кольцо перед тобой.")
-	addInfoLine("🎨  Theme", "5 цветовых тем, 3 стиля интерфейса.")
-	addInfoLine("💾  Config", "Настройки в " .. CONFIG_FOLDER .. "/" .. CONFIG_FILE)
-	addInfoLine("⌨  Клавиши", "Insert / RightCtrl / F1 / RightShift — меню.")
+	addInfoLine("⚔  Combat — Magnet All", "Собирает всех игроков перед тобой.")
+	addInfoLine("🎨  Theme", "5 тем, 3 стиля.")
+	addInfoLine("💾  Config", "C:\\" .. CONFIG_FOLDER .. "\\" .. CONFIG_FILE)
 
 	-- ============================================================
 	-- FARMING
 	-- ============================================================
-	local farmingTP = createSection(farmingPage, "TELEPORT (плавный)", true)
+	local farmingTP = createSection(farmingPage, "TELEPORT", true)
 	local saveBtn = createActionBtn(farmingTP, "📌  Запомнить координаты", Color3.fromRGB(80, 130, 230))
-	local tpBtn = createActionBtn(farmingTP, "🚀  Телепорт на координаты", Color3.fromRGB(80, 200, 130))
-	local backBtn = createActionBtn(farmingTP, "↩  Вернуться обратно", Color3.fromRGB(230, 100, 80))
+	local tpBtn = createActionBtn(farmingTP, "🚀  Телепорт", Color3.fromRGB(80, 200, 130))
+	local backBtn = createActionBtn(farmingTP, "↩  Вернуться", Color3.fromRGB(230, 100, 80))
 
-	local farmingInstant = createSection(farmingPage, "INSTANT TELEPORT", true)
-	local instantSaveBtn = createActionBtn(farmingInstant, "📌  Запомнить координаты (Instant)", Color3.fromRGB(80, 130, 230))
-	local instantTpBtn = createActionBtn(farmingInstant, "⚡  Моментальный телепорт", Color3.fromRGB(255, 200, 80))
+	local farmingInstant = createSection(farmingPage, "INSTANT", true)
+	local instantSaveBtn = createActionBtn(farmingInstant, "📌  Запомнить (Instant)", Color3.fromRGB(80, 130, 230))
+	local instantTpBtn = createActionBtn(farmingInstant, "⚡  Моментальный ТП", Color3.fromRGB(255, 200, 80))
 	local instantBackBtn = createActionBtn(farmingInstant, "↩  Вернуться (Instant)", Color3.fromRGB(230, 120, 80))
 
 	local farmingSpeed = createSection(farmingPage, "SPEED", true)
-	local flySpeedSlider = createSlider(farmingSpeed, "🚀  Скорость полёта (TP)", flySpeed, 20, 500, 25, THEMES[currentTheme].sliderColor)
+	local flySpeedSlider = createSlider(farmingSpeed, "🚀  Скорость полёта", flySpeed, 20, 500, 25, THEMES[currentTheme].sliderColor)
 	sliderRefs[flySpeedSlider].onChanged = function(v) flySpeed = v; saveConfig() end
 
 	-- ============================================================
 	-- MOVEMENT
 	-- ============================================================
 	local movementPlayer = createSection(movementPage, "PLAYER", true)
-	local walkSlider = createSlider(movementPlayer, "🏃  Скорость бега", walkSpeedValue, 8, 200, 16, THEMES[currentTheme].sliderColor)
+	local walkSlider = createSlider(movementPlayer, "🏃  WalkSpeed", walkSpeedValue, 8, 200, 16, THEMES[currentTheme].sliderColor)
 	sliderRefs[walkSlider].onChanged = function(v)
 		walkSpeedValue = v
 		local _, _, humanoid = getCharacterParts()
@@ -1163,7 +1154,7 @@ task.spawn(function()
 		saveConfig()
 	end
 
-	local jumpSlider = createSlider(movementPlayer, "🦘  Сила прыжка", jumpPowerValue, 0, 200, 10, THEMES[currentTheme].sliderColor)
+	local jumpSlider = createSlider(movementPlayer, "🦘  JumpPower", jumpPowerValue, 0, 200, 10, THEMES[currentTheme].sliderColor)
 	sliderRefs[jumpSlider].onChanged = function(v)
 		jumpPowerValue = v
 		local _, _, humanoid = getCharacterParts()
@@ -1172,7 +1163,7 @@ task.spawn(function()
 	end
 
 	local movementFly = createSection(movementPage, "🚀  FLY", true)
-	local flyToggle = createToggle(movementFly, "🚀  Fly (свободный полёт)", false, function(state)
+	local flyToggle = createToggle(movementFly, "🚀  Fly", false, function(state)
 		flyEnabled = state
 		if not state then
 			if flyConn then flyConn:Disconnect() flyConn = nil end
@@ -1181,9 +1172,6 @@ task.spawn(function()
 				humanoid.PlatformStand = false
 				humanoid.WalkSpeed = walkSpeedValue
 				humanoid.JumpPower = jumpPowerValue
-				humanoid.JumpHeight = 7.2
-				humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-				humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
 			end
 			if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
 		end
@@ -1195,46 +1183,25 @@ task.spawn(function()
 	-- ============================================================
 	-- PLAYERS
 	-- ============================================================
-	local playersAuto = createSection(playersPage, "⚡  AUTO-TP К БЛИЖАЙШЕМУ", true)
+	local playersAuto = createSection(playersPage, "⚡  AUTO-TP", true)
 
 	local autoTpToggle = createToggle(playersAuto, "⚡  Auto-TP (зажми бинд)", autoTpEnabled, function(state)
 		autoTpEnabled = state
-		if autoTpStatus then
-			autoTpStatus.Text = state and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-			autoTpStatus.TextColor3 = state and THEMES[currentTheme].success or THEMES[currentTheme].text
-		end
 		saveConfig()
 	end)
 
-	local autoTpStatus = Instance.new("TextLabel")
-	autoTpStatus.Size = UDim2.new(1, 0, 0, 26)
-	autoTpStatus.BackgroundColor3 = THEMES[currentTheme].button
-	autoTpStatus.Text = autoTpEnabled and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-	autoTpStatus.TextColor3 = autoTpEnabled and THEMES[currentTheme].success or THEMES[currentTheme].text
-	autoTpStatus.TextSize = 11
-	autoTpStatus.TextXAlignment = Enum.TextXAlignment.Left
-	autoTpStatus.Font = Enum.Font.Gotham
-	autoTpStatus.BorderSizePixel = 0
-	autoTpStatus.Parent = playersAuto
-	autoTpStatus.ZIndex = 12
-	registerThemeTarget(autoTpStatus, "button")
-	local atsC = Instance.new("UICorner") atsC.CornerRadius = UDim.new(0, 6) atsC.Parent = autoTpStatus
-
-	local autoTpAboveToggle = createToggle(playersAuto, "⬆  Телепорт ВВЕРХ над игроком", autoTpAbove, function(state)
+	local autoTpAboveToggle = createToggle(playersAuto, "⬆  Телепорт ВВЕРХ", autoTpAbove, function(state)
 		autoTpAbove = state
 		saveConfig()
 	end)
 
 	local autoTpBindRow = createBindRow(
 		playersAuto,
-		"Клавиша Auto-TP (зажми):",
+		"Клавиша Auto-TP:",
 		function() return autoTpKeyName end,
 		function(key, name)
 			autoTpKey = key
 			autoTpKeyName = name
-			if autoTpStatus then
-				autoTpStatus.Text = autoTpEnabled and ("   Статус: ВКЛ  |  Бинд: " .. autoTpKeyName) or "   Статус: ВЫКЛ"
-			end
 			saveConfig()
 		end,
 		{
@@ -1249,7 +1216,7 @@ task.spawn(function()
 		}
 	)
 
-	local playersList = createSection(playersPage, "👥  ИГРОКИ (ближайший сверху)", true)
+	local playersList = createSection(playersPage, "👥  ИГРОКИ", true)
 
 	local playersListFrame = Instance.new("Frame")
 	playersListFrame.Size = UDim2.new(1, 0, 0, 220)
@@ -1266,7 +1233,6 @@ task.spawn(function()
 	playersListScroll.BackgroundTransparency = 1
 	playersListScroll.BorderSizePixel = 0
 	playersListScroll.ScrollBarThickness = 4
-	playersListScroll.ScrollBarImageColor3 = THEMES[currentTheme].textDim
 	playersListScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 	playersListScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	playersListScroll.Parent = playersListFrame
@@ -1297,7 +1263,6 @@ task.spawn(function()
 			row.AutoButtonColor = false
 			row.Parent = playersListScroll
 			row.ZIndex = 13
-			registerThemeTarget(row, isNearest and "accent" or "button")
 			local rc = Instance.new("UICorner") rc.CornerRadius = UDim.new(0, 6) rc.Parent = row
 
 			local avatar = Instance.new("ImageLabel")
@@ -1308,7 +1273,6 @@ task.spawn(function()
 			avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=48&h=48"
 			avatar.Parent = row
 			avatar.ZIndex = 14
-			registerThemeTarget(avatar, "button")
 			local ac = Instance.new("UICorner") ac.CornerRadius = UDim.new(1, 0) ac.Parent = avatar
 
 			local nameLbl = Instance.new("TextLabel")
@@ -1335,23 +1299,6 @@ task.spawn(function()
 			distLbl.Parent = row
 			distLbl.ZIndex = 14
 
-			local icon = Instance.new("TextLabel")
-			icon.Size = UDim2.new(0, 30, 1, 0)
-			icon.Position = UDim2.new(1, -32, 0, 0)
-			icon.BackgroundTransparency = 1
-			icon.Text = "🧲"
-			icon.TextColor3 = THEMES[currentTheme].accent
-			icon.TextSize = 16
-			icon.Font = Enum.Font.GothamBold
-			icon.Parent = row
-			icon.ZIndex = 14
-
-			row.MouseEnter:Connect(function()
-				row.BackgroundColor3 = THEMES[currentTheme].accent
-			end)
-			row.MouseLeave:Connect(function()
-				row.BackgroundColor3 = isNearest and THEMES[currentTheme].accent or THEMES[currentTheme].header
-			end)
 			row.MouseButton1Click:Connect(function()
 				startMagnet(plr)
 			end)
@@ -1360,75 +1307,25 @@ task.spawn(function()
 		end
 	end
 
-	local playersActions = createSection(playersPage, "ДЕЙСТВИЯ", true)
-	local magnetStatusLabel = Instance.new("TextLabel")
-	magnetStatusLabel.Size = UDim2.new(1, 0, 0, 26)
-	magnetStatusLabel.BackgroundColor3 = THEMES[currentTheme].button
-	magnetStatusLabel.Text = "   Цель: нет"
-	magnetStatusLabel.TextColor3 = THEMES[currentTheme].text
-	magnetStatusLabel.TextSize = 11
-	magnetStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-	magnetStatusLabel.Font = Enum.Font.Gotham
-	magnetStatusLabel.BorderSizePixel = 0
-	magnetStatusLabel.Parent = playersActions
-	magnetStatusLabel.ZIndex = 12
-	registerThemeTarget(magnetStatusLabel, "button")
-	local mslC = Instance.new("UICorner") mslC.CornerRadius = UDim.new(0, 6) mslC.Parent = magnetStatusLabel
-
-	local stopMagnetBtn = createActionBtn(playersActions, "✕  Отлипнуть (пробел)", Color3.fromRGB(230, 80, 80))
-	local refreshPlayersBtn = createActionBtn(playersActions, "🔄  Обновить список", Color3.fromRGB(100, 180, 255))
-
 	-- ============================================================
 	-- COMBAT
 	-- ============================================================
-	local combatAim = createSection(combatPage, "🎯  AIMBOT (зажми бинд)", true)
+	local combatAim = createSection(combatPage, "🎯  AIMBOT", true)
 
-	local aimbotToggle = createToggle(combatAim, "🎯  Aimbot (aim lock)", aimbotEnabled, function(state)
+	local aimbotToggle = createToggle(combatAim, "🎯  Aimbot (зажми бинд)", aimbotEnabled, function(state)
 		aimbotEnabled = state
-		if aimbotStatusLabel then
-			aimbotStatusLabel.Text = state and ("   Aimbot: ВКЛ  |  Бинд: " .. aimbotKeyName) or "   Aimbot: ВЫКЛ"
-			aimbotStatusLabel.TextColor3 = state and THEMES[currentTheme].danger or THEMES[currentTheme].text
-		end
 		saveConfig()
 	end)
-
-	local aimbotStatusLabel = Instance.new("TextLabel")
-	aimbotStatusLabel.Size = UDim2.new(1, 0, 0, 26)
-	aimbotStatusLabel.BackgroundColor3 = THEMES[currentTheme].button
-	aimbotStatusLabel.Text = aimbotEnabled and ("   Aimbot: ВКЛ  |  Бинд: " .. aimbotKeyName) or "   Aimbot: ВЫКЛ"
-	aimbotStatusLabel.TextColor3 = aimbotEnabled and THEMES[currentTheme].danger or THEMES[currentTheme].text
-	aimbotStatusLabel.TextSize = 11
-	aimbotStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-	aimbotStatusLabel.Font = Enum.Font.Gotham
-	aimbotStatusLabel.BorderSizePixel = 0
-	aimbotStatusLabel.Parent = combatAim
-	aimbotStatusLabel.ZIndex = 12
-	registerThemeTarget(aimbotStatusLabel, "button")
-	local aslC = Instance.new("UICorner") aslC.CornerRadius = UDim.new(0, 6) aslC.Parent = aimbotStatusLabel
-
-	local aimbotTargetLabel = Instance.new("TextLabel")
-	aimbotTargetLabel.Size = UDim2.new(1, 0, 0, 26)
-	aimbotTargetLabel.BackgroundColor3 = THEMES[currentTheme].button
-	aimbotTargetLabel.Text = "   Цель: —"
-	aimbotTargetLabel.TextColor3 = THEMES[currentTheme].text
-	aimbotTargetLabel.TextSize = 11
-	aimbotTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
-	aimbotTargetLabel.Font = Enum.Font.Gotham
-	aimbotTargetLabel.BorderSizePixel = 0
-	aimbotTargetLabel.Parent = combatAim
-	aimbotTargetLabel.ZIndex = 12
-	registerThemeTarget(aimbotTargetLabel, "button")
-	local atlC = Instance.new("UICorner") atlC.CornerRadius = UDim.new(0, 6) atlC.Parent = aimbotTargetLabel
 
 	local combatSettings = createSection(combatPage, "⚙  НАСТРОЙКИ AIMBOT", true)
 
 	local aimbotSmoothSlider = createSlider(combatSettings, "🎯  Плавность", aimbotSmoothness, 0, 1, 0.05, THEMES[currentTheme].sliderColor, true)
 	sliderRefs[aimbotSmoothSlider].onChanged = function(v) aimbotSmoothness = v; saveConfig() end
 
-	local aimbotRangeSlider = createSlider(combatSettings, "📏  Дальность (studs)", aimbotRange, 30, 1000, 30, THEMES[currentTheme].sliderColor)
+	local aimbotRangeSlider = createSlider(combatSettings, "📏  Дальность", aimbotRange, 30, 1000, 30, THEMES[currentTheme].sliderColor)
 	sliderRefs[aimbotRangeSlider].onChanged = function(v) aimbotRange = v; saveConfig() end
 
-	local aimbotTeamToggle = createToggle(combatSettings, "👥  Игнорировать своих (Team Check)", aimbotTeamCheck, function(state)
+	local aimbotTeamToggle = createToggle(combatSettings, "👥  Игнорировать своих", aimbotTeamCheck, function(state)
 		aimbotTeamCheck = state
 		saveConfig()
 	end)
@@ -1440,14 +1337,11 @@ task.spawn(function()
 
 	local aimbotBindRow = createBindRow(
 		combatSettings,
-		"Клавиша Aimbot (зажми):",
+		"Клавиша Aimbot:",
 		function() return aimbotKeyName end,
 		function(key, name)
 			aimbotKey = key
 			aimbotKeyName = name
-			if aimbotStatusLabel then
-				aimbotStatusLabel.Text = aimbotEnabled and ("   Aimbot: ВКЛ  |  Бинд: " .. aimbotKeyName) or "   Aimbot: ВЫКЛ"
-			end
 			saveConfig()
 		end,
 		{
@@ -1466,31 +1360,13 @@ task.spawn(function()
 
 	local triggerbotToggle = createToggle(combatTrigger, "🔫  Triggerbot", triggerbotEnabled, function(state)
 		triggerbotEnabled = state
-		if triggerbotStatus then
-			triggerbotStatus.Text = state and "   Triggerbot: ВКЛ" or "   Triggerbot: ВЫКЛ"
-			triggerbotStatus.TextColor3 = state and THEMES[currentTheme].danger or THEMES[currentTheme].text
-		end
 		saveConfig()
 	end)
 
-	local triggerbotStatus = Instance.new("TextLabel")
-	triggerbotStatus.Size = UDim2.new(1, 0, 0, 26)
-	triggerbotStatus.BackgroundColor3 = THEMES[currentTheme].button
-	triggerbotStatus.Text = triggerbotEnabled and "   Triggerbot: ВКЛ" or "   Triggerbot: ВЫКЛ"
-	triggerbotStatus.TextColor3 = triggerbotEnabled and THEMES[currentTheme].danger or THEMES[currentTheme].text
-	triggerbotStatus.TextSize = 11
-	triggerbotStatus.TextXAlignment = Enum.TextXAlignment.Left
-	triggerbotStatus.Font = Enum.Font.Gotham
-	triggerbotStatus.BorderSizePixel = 0
-	triggerbotStatus.Parent = combatTrigger
-	triggerbotStatus.ZIndex = 12
-	registerThemeTarget(triggerbotStatus, "button")
-	local tbsC = Instance.new("UICorner") tbsC.CornerRadius = UDim.new(0, 6) tbsC.Parent = triggerbotStatus
-
-	local triggerbotRangeSlider = createSlider(combatTrigger, "📏  Радиус (studs)", triggerbotRange, 10, 200, 5, THEMES[currentTheme].sliderColor)
+	local triggerbotRangeSlider = createSlider(combatTrigger, "📏  Радиус", triggerbotRange, 10, 200, 5, THEMES[currentTheme].sliderColor)
 	sliderRefs[triggerbotRangeSlider].onChanged = function(v) triggerbotRange = v; saveConfig() end
 
-	local triggerbotDelaySlider = createSlider(combatTrigger, "⏱  Задержка (сек)", triggerbotDelay, 0.05, 1, 0.05, THEMES[currentTheme].sliderColor, true)
+	local triggerbotDelaySlider = createSlider(combatTrigger, "⏱  Задержка", triggerbotDelay, 0.05, 1, 0.05, THEMES[currentTheme].sliderColor, true)
 	sliderRefs[triggerbotDelaySlider].onChanged = function(v) triggerbotDelay = v; saveConfig() end
 
 	local combatMagnetAll = createSection(combatPage, "🌀  MAGNET ALL", true)
@@ -1504,27 +1380,13 @@ task.spawn(function()
 		end
 	end)
 
-	local magnetAllStatus = Instance.new("TextLabel")
-	magnetAllStatus.Size = UDim2.new(1, 0, 0, 26)
-	magnetAllStatus.BackgroundColor3 = THEMES[currentTheme].button
-	magnetAllStatus.Text = "   Magnet All: ВЫКЛ"
-	magnetAllStatus.TextColor3 = THEMES[currentTheme].text
-	magnetAllStatus.TextSize = 11
-	magnetAllStatus.TextXAlignment = Enum.TextXAlignment.Left
-	magnetAllStatus.Font = Enum.Font.Gotham
-	magnetAllStatus.BorderSizePixel = 0
-	magnetAllStatus.Parent = combatMagnetAll
-	magnetAllStatus.ZIndex = 12
-	registerThemeTarget(magnetAllStatus, "button")
-	local masC = Instance.new("UICorner") masC.CornerRadius = UDim.new(0, 6) masC.Parent = magnetAllStatus
-
-	local magnetAllOffsetSlider = createSlider(combatMagnetAll, "📍  Вперёд ставить", magnetAllForwardOffset, 3, 60, 2, THEMES[currentTheme].sliderColor)
+	local magnetAllOffsetSlider = createSlider(combatMagnetAll, "📍  Вперёд", magnetAllForwardOffset, 3, 60, 2, THEMES[currentTheme].sliderColor)
 	sliderRefs[magnetAllOffsetSlider].onChanged = function(v) magnetAllForwardOffset = v; saveConfig() end
 
-	local magnetAllRadiusSlider = createSlider(combatMagnetAll, "📏  Радиус сбора (studs)", magnetAllRadius, 10, 500, 10, THEMES[currentTheme].sliderColor)
+	local magnetAllRadiusSlider = createSlider(combatMagnetAll, "📏  Радиус", magnetAllRadius, 10, 500, 10, THEMES[currentTheme].sliderColor)
 	sliderRefs[magnetAllRadiusSlider].onChanged = function(v) magnetAllRadius = v; saveConfig() end
 
-	local magnetAllDurationSlider = createSlider(combatMagnetAll, "⏱  Длительность (0 = ∞)", magnetAllHoldTime, 0, 60, 2, THEMES[currentTheme].sliderColor)
+	local magnetAllDurationSlider = createSlider(combatMagnetAll, "⏱  Длительность (0=∞)", magnetAllHoldTime, 0, 60, 2, THEMES[currentTheme].sliderColor)
 	sliderRefs[magnetAllDurationSlider].onChanged = function(v) magnetAllHoldTime = v; saveConfig() end
 
 	-- ============================================================
@@ -1557,14 +1419,10 @@ task.spawn(function()
 			local obj = ref.obj
 			if obj and obj.Parent then
 				local role = ref.role
-				if role == "bg" then
-					obj.BackgroundColor3 = t.bg
-				elseif role == "panel" then
-					obj.BackgroundColor3 = t.panel
-				elseif role == "topBar" then
-					obj.BackgroundColor3 = t.topBar
-				elseif role == "button" then
-					obj.BackgroundColor3 = t.button
+				if role == "bg" then obj.BackgroundColor3 = t.bg
+				elseif role == "panel" then obj.BackgroundColor3 = t.panel
+				elseif role == "topBar" then obj.BackgroundColor3 = t.topBar
+				elseif role == "button" then obj.BackgroundColor3 = t.button
 				elseif role == "header" then
 					obj.BackgroundColor3 = t.header
 					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.headerText end
@@ -1572,10 +1430,8 @@ task.spawn(function()
 					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.text end
 				elseif role == "textDim" then
 					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.textDim end
-				elseif role == "barBg" then
-					obj.BackgroundColor3 = t.barBg
-				elseif role == "accent" then
-					obj.BackgroundColor3 = t.accent
+				elseif role == "barBg" then obj.BackgroundColor3 = t.barBg
+				elseif role == "accent" then obj.BackgroundColor3 = t.accent
 				elseif role == "buttonText" then
 					obj.BackgroundColor3 = t.button
 					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.text end
@@ -1609,18 +1465,6 @@ task.spawn(function()
 			end
 		end
 
-		for name, btn in pairs(themeButtonRefs) do
-			if name == themeName then
-				btn.BackgroundColor3 = t.accent
-				btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-				btn.UIStroke.Transparency = 0
-			else
-				btn.BackgroundColor3 = t.button
-				btn.TextColor3 = t.text
-				btn.UIStroke.Transparency = 0.7
-			end
-		end
-
 		saveConfig()
 	end
 
@@ -1644,14 +1488,6 @@ task.spawn(function()
 
 		contentArea.Size = UDim2.new(1, -(s.sidebarWidth + 24), 1, -(s.topBarHeight + 22))
 		contentArea.Position = UDim2.new(0, s.sidebarWidth + s.padding + 8, 0, s.topBarHeight + 12)
-
-		for _, obj in ipairs(window:GetDescendants()) do
-			if obj:IsA("UICorner") then
-				obj.CornerRadius = UDim.new(0, s.buttonRadius)
-			end
-		end
-		windowCorner.CornerRadius = UDim.new(0, s.cornerRadius)
-		topBarCorner.CornerRadius = UDim.new(0, s.cornerRadius)
 
 		saveConfig()
 	end
@@ -1704,21 +1540,7 @@ task.spawn(function()
 		themeButtonRefs[preset.name] = btn
 	end
 
-	local styleSection = createSection(themePage, "🖼  СТИЛЬ ИНТЕРФЕЙСА", false)
-
-	local styleHint = Instance.new("TextLabel")
-	styleHint.Size = UDim2.new(1, 0, 0, 24)
-	styleHint.BackgroundColor3 = THEMES[currentTheme].button
-	styleHint.Text = "   Выбери стиль:"
-	styleHint.TextColor3 = THEMES[currentTheme].text
-	styleHint.TextSize = 11
-	styleHint.TextXAlignment = Enum.TextXAlignment.Left
-	styleHint.Font = Enum.Font.Gotham
-	styleHint.BorderSizePixel = 0
-	styleHint.Parent = styleSection
-	styleHint.ZIndex = 12
-	registerThemeTarget(styleHint, "button")
-	local shc = Instance.new("UICorner") shc.CornerRadius = UDim.new(0, 6) shc.Parent = styleHint
+	local styleSection = createSection(themePage, "🖼  СТИЛЬ", false)
 
 	local stylePresets = {
 		{name = "Default", desc = "Стандартный", icon = "🎨"},
@@ -1744,17 +1566,6 @@ task.spawn(function()
 		registerThemeTarget(btn, "buttonText")
 		local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = btn
 
-		btn.MouseEnter:Connect(function()
-			btn.BackgroundColor3 = THEMES[currentTheme].buttonHover
-		end)
-		btn.MouseLeave:Connect(function()
-			if styleButtonRefs[preset.name] and styleButtonRefs[preset.name].selected then
-				btn.BackgroundColor3 = THEMES[currentTheme].accent
-			else
-				btn.BackgroundColor3 = THEMES[currentTheme].button
-			end
-		end)
-
 		btn.MouseButton1Click:Connect(function()
 			for _, b in pairs(styleButtonRefs) do
 				b.btn.BackgroundColor3 = THEMES[currentTheme].button
@@ -1774,37 +1585,14 @@ task.spawn(function()
 	-- MISC
 	-- ============================================================
 	local miscSection = createSection(miscPage, "SETTINGS", false)
-	local unloadBtn = createActionBtn(miscSection, "✕  Unload (убрать скрипт)", Color3.fromRGB(230, 80, 80))
+	local unloadBtn = createActionBtn(miscSection, "✕  Unload", Color3.fromRGB(230, 80, 80))
 	local saveConfigBtn = createActionBtn(miscSection, "💾  Сохранить конфиг", Color3.fromRGB(80, 180, 120))
 	local loadConfigBtn = createActionBtn(miscSection, "📂  Загрузить конфиг", Color3.fromRGB(80, 130, 230))
-	local resetBtn = createActionBtn(miscSection, "↺  Сбросить настройки", Color3.fromRGB(160, 160, 200))
-
-	local configHint = Instance.new("TextLabel")
-	configHint.Size = UDim2.new(1, 0, 0, 40)
-	configHint.BackgroundColor3 = THEMES[currentTheme].button
-	configHint.Text = hasFileAPI
-		and ("   💾 Конфиг: C:\\" .. CONFIG_FOLDER .. "\\" .. CONFIG_FILE)
-		or "   ⚠ File API недоступен"
-	configHint.TextColor3 = THEMES[currentTheme].textDim
-	configHint.TextSize = 10
-	configHint.TextWrapped = true
-	configHint.TextXAlignment = Enum.TextXAlignment.Left
-	configHint.Font = Enum.Font.Gotham
-	configHint.BorderSizePixel = 0
-	configHint.Parent = miscSection
-	configHint.ZIndex = 12
-	registerThemeTarget(configHint, "button")
-	local chC = Instance.new("UICorner") chC.CornerRadius = UDim.new(0, 6) chC.Parent = configHint
+	local resetBtn = createActionBtn(miscSection, "↺  Сбросить", Color3.fromRGB(160, 160, 200))
 
 	-- ============================================================
-	-- ФУНКЦИИ
+	-- ЛОГИКА
 	-- ============================================================
-	function getCharacterParts()
-		local char = player.Character
-		if not char then return nil, nil, nil end
-		return char, char:FindFirstChild("HumanoidRootPart"), char:FindFirstChildOfClass("Humanoid")
-	end
-
 	local function applyWalkSpeed()
 		local _, _, humanoid = getCharacterParts()
 		if humanoid and not flyEnabled then humanoid.WalkSpeed = walkSpeedValue end
@@ -1838,27 +1626,10 @@ task.spawn(function()
 	end
 	startFlyLoop()
 
-	local function stopMagnet()
-		magnetEnabled = false
-		magnetTarget = nil
-		if magnetConn then magnetConn:Disconnect() magnetConn = nil end
-		local _, hrp, humanoid = getCharacterParts()
-		if humanoid then
-			humanoid.PlatformStand = false
-			humanoid.WalkSpeed = walkSpeedValue
-			humanoid.JumpPower = jumpPowerValue
-			humanoid.JumpHeight = 7.2
-		end
-		if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
-		magnetStatusLabel.Text = "   Цель: нет"
-	end
-
 	function startMagnet(targetPlayer)
-		if not targetPlayer then return end
-		if targetPlayer == player then return end
+		if not targetPlayer or targetPlayer == player then return end
 		magnetEnabled = true
 		magnetTarget = targetPlayer
-		magnetStatusLabel.Text = "   Цель: " .. targetPlayer.Name
 
 		local _, hrp, humanoid = getCharacterParts()
 		if not hrp or not humanoid then return end
@@ -1867,13 +1638,21 @@ task.spawn(function()
 		if magnetConn then magnetConn:Disconnect() end
 		magnetConn = RunService.Heartbeat:Connect(function(dt)
 			if unloaded or not magnetEnabled then return end
-			if not magnetTarget then stopMagnet() return end
+			if not magnetTarget then
+				magnetEnabled = false
+				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
+				return
+			end
 			local myChar, myHrp = getCharacterParts()
 			if not myChar or not myHrp then return end
 			local targetChar = magnetTarget.Character
-			if not targetChar then stopMagnet() return end
+			if not targetChar then
+				magnetEnabled = false
+				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
+				return
+			end
 			local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-			if not targetHrp then stopMagnet() return end
+			if not targetHrp then return end
 			local targetPos = targetHrp.Position - targetHrp.CFrame.LookVector * magnetDistance + Vector3.new(0, 2, 0)
 			local current = myHrp.Position
 			local diff = targetPos - current
@@ -1910,11 +1689,7 @@ task.spawn(function()
 		if aimbotConn then aimbotConn:Disconnect() end
 		aimbotConn = RunService.RenderStepped:Connect(function(dt)
 			if unloaded or not aimbotEnabled then return end
-			if not UserInputService:IsKeyDown(aimbotKey) then
-				aimbotTarget = nil
-				if aimbotTargetLabel then aimbotTargetLabel.Text = "   Цель: —" end
-				return
-			end
+			if not UserInputService:IsKeyDown(aimbotKey) then return end
 			local char, hrp = getCharacterParts()
 			if not char or not hrp then return end
 			local camera = workspace.CurrentCamera
@@ -1952,19 +1727,12 @@ task.spawn(function()
 				end
 			end
 			if closest then
-				aimbotTarget = closest.player
-				if aimbotTargetLabel then
-					aimbotTargetLabel.Text = "   Цель: " .. closest.player.Name .. string.format(" (%.0f studs)", closest.dist)
-				end
 				local targetPos = closest.hrp.Position
 				local currentCF = camera.CFrame
 				local targetCF = CFrame.new(currentCF.Position, targetPos)
 				pcall(function()
 					camera.CFrame = currentCF:Lerp(targetCF, 1 - aimbotSmoothness)
 				end)
-			else
-				aimbotTarget = nil
-				if aimbotTargetLabel then aimbotTargetLabel.Text = "   Цель: —" end
 			end
 		end)
 	end
@@ -2014,17 +1782,10 @@ task.spawn(function()
 	function startMagnetAll()
 		if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
 		magnetAllEndTime = (magnetAllHoldTime > 0) and (os.clock() + magnetAllHoldTime) or 0
-		if magnetAllStatus then
-			magnetAllStatus.Text = "   Magnet All: ВКЛ"
-			magnetAllStatus.TextColor3 = THEMES[currentTheme].accent
-		end
 		magnetAllConn = RunService.Heartbeat:Connect(function(dt)
 			if unloaded or not magnetAllEnabled then return end
 			if magnetAllEndTime > 0 and os.clock() >= magnetAllEndTime then
 				magnetAllEnabled = false
-				if magnetAllToggle and toggleRefs[magnetAllToggle] then
-					toggleRefs[magnetAllToggle].setState(false)
-				end
 				stopMagnetAll()
 				return
 			end
@@ -2067,10 +1828,6 @@ task.spawn(function()
 	function stopMagnetAll()
 		magnetAllEnabled = false
 		if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
-		if magnetAllStatus then
-			magnetAllStatus.Text = "   Magnet All: ВЫКЛ"
-			magnetAllStatus.TextColor3 = THEMES[currentTheme].text
-		end
 	end
 
 	local function stepFlyTo(targetPos)
@@ -2111,7 +1868,6 @@ task.spawn(function()
 		humanoid.PlatformStand = true
 		humanoid.WalkSpeed = 0
 		humanoid.JumpPower = 0
-		humanoid.JumpHeight = 0
 		local startPos = hrp.Position
 		local endPos = targetPosition + Vector3.new(0, 3, 0)
 		local liftPos = Vector3.new(startPos.X, startPos.Y + flyHeight, startPos.Z)
@@ -2121,7 +1877,6 @@ task.spawn(function()
 				humanoid.PlatformStand = false
 				humanoid.WalkSpeed = walkSpeedValue
 				humanoid.JumpPower = jumpPowerValue
-				humanoid.JumpHeight = 7.2
 			end
 			if currentTool then
 				task.wait(0.05)
@@ -2159,9 +1914,6 @@ task.spawn(function()
 		local _, hrp = getCharacterParts()
 		if not hrp then return end
 		savedPosition = hrp.Position
-		saveBtn.Text = "    ✓  Сохранено!"
-		task.wait(1)
-		saveBtn.Text = "    📌  Запомнить координаты"
 	end))
 
 	table.insert(connections, tpBtn.MouseButton1Click:Connect(function()
@@ -2188,9 +1940,6 @@ task.spawn(function()
 		local _, hrp = getCharacterParts()
 		if not hrp then return end
 		savedPosition = hrp.Position
-		instantSaveBtn.Text = "    ✓  Сохранено!"
-		task.wait(1)
-		instantSaveBtn.Text = "    📌  Запомнить координаты (Instant)"
 	end))
 
 	table.insert(connections, instantTpBtn.MouseButton1Click:Connect(function()
@@ -2212,40 +1961,20 @@ task.spawn(function()
 		positionBeforeTeleport = temp
 	end))
 
-	table.insert(connections, stopMagnetBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		stopMagnet()
-	end))
-
-	table.insert(connections, refreshPlayersBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		refreshPlayersList()
-	end))
-
 	table.insert(connections, saveConfigBtn.MouseButton1Click:Connect(function()
 		if unloaded then return end
-		local ok = saveConfig()
-		saveConfigBtn.Text = ok and "    ✓  Сохранено!" or "    ⚠  Ошибка!"
-		task.wait(1)
-		saveConfigBtn.Text = "    💾  Сохранить конфиг"
+		saveConfig()
 	end))
 
 	table.insert(connections, loadConfigBtn.MouseButton1Click:Connect(function()
 		if unloaded then return end
-		local ok = loadConfig()
-		loadConfigBtn.Text = ok and "    ✓  Загружено!" or "    ⚠  Нет конфига"
+		loadConfig()
 		applyTheme(currentTheme)
 		applyStyle(currentStyle)
 		if sliderRefs[walkSlider] then sliderRefs[walkSlider].setValue(walkSpeedValue) end
 		if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(jumpPowerValue) end
 		if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(flySpeed) end
 		if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(flyFreeSpeed) end
-		if sliderRefs[aimbotSmoothSlider] then sliderRefs[aimbotSmoothSlider].setValue(aimbotSmoothness) end
-		if sliderRefs[aimbotRangeSlider] then sliderRefs[aimbotRangeSlider].setValue(aimbotRange) end
-		if sliderRefs[triggerbotRangeSlider] then sliderRefs[triggerbotRangeSlider].setValue(triggerbotRange) end
-		if sliderRefs[triggerbotDelaySlider] then sliderRefs[triggerbotDelaySlider].setValue(triggerbotDelay) end
-		task.wait(1)
-		loadConfigBtn.Text = "    📂  Загрузить конфиг"
 	end))
 
 	table.insert(connections, resetBtn.MouseButton1Click:Connect(function()
@@ -2263,21 +1992,17 @@ task.spawn(function()
 		if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(50) end
 		if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(100) end
 		if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(80) end
-		resetBtn.Text = "    ✓  Сброшено!"
-		task.wait(1)
-		resetBtn.Text = "    ↺  Сбросить настройки"
 		saveConfig()
 	end))
 
 	table.insert(connections, closeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
 	table.insert(connections, minimizeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
 
-	local function doUnload()
+	table.insert(connections, unloadBtn.MouseButton1Click:Connect(function()
 		if unloaded then return end
 		unloaded = true
 		flyEnabled = false
 		if flyConn then flyConn:Disconnect() flyConn = nil end
-		stopMagnet()
 		stopMagnetAll()
 		if aimbotConn then aimbotConn:Disconnect() aimbotConn = nil end
 		if triggerbotConn then triggerbotConn:Disconnect() triggerbotConn = nil end
@@ -2288,8 +2013,7 @@ task.spawn(function()
 		connections = {}
 		if screenGui and screenGui.Parent then screenGui:Destroy() end
 		print("[VIPMenu] Выгружено.")
-	end
-	table.insert(connections, unloadBtn.MouseButton1Click:Connect(doUnload))
+	end))
 
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
@@ -2312,9 +2036,7 @@ task.spawn(function()
 		end
 	end)
 
-	-- ============================================================
-	-- КЛАВИШИ
-	-- ============================================================
+	-- ===== КЛАВИШИ =====
 	local toggleKeys = {
 		Enum.KeyCode.Insert,
 		Enum.KeyCode.RightControl,
@@ -2332,7 +2054,11 @@ task.spawn(function()
 
 		if input.KeyCode == Enum.KeyCode.Space then
 			if isTeleporting then teleportCancelled = true end
-			if magnetEnabled then stopMagnet() end
+			if magnetEnabled then
+				magnetEnabled = false
+				magnetTarget = nil
+				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
+			end
 			return
 		end
 
@@ -2344,53 +2070,41 @@ task.spawn(function()
 		end
 
 		if gameProcessed then return end
-
-		if input.KeyCode == Enum.KeyCode.End then
-			doUnload()
-		end
 	end))
 
-	-- Загрузка конфига и применение
+	-- Загрузка конфига
 	loadConfig()
 	applyTheme(currentTheme)
 	applyStyle(currentStyle)
 
-	if sliderRefs[walkSlider] then sliderRefs[walkSlider].setValue(walkSpeedValue) end
-	if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(jumpPowerValue) end
-	if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(flySpeed) end
-	if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(flyFreeSpeed) end
-	if sliderRefs[aimbotSmoothSlider] then sliderRefs[aimbotSmoothSlider].setValue(aimbotSmoothness) end
-	if sliderRefs[aimbotRangeSlider] then sliderRefs[aimbotRangeSlider].setValue(aimbotRange) end
-	if sliderRefs[triggerbotRangeSlider] then sliderRefs[triggerbotRangeSlider].setValue(triggerbotRange) end
-	if sliderRefs[triggerbotDelaySlider] then sliderRefs[triggerbotDelaySlider].setValue(triggerbotDelay) end
-
 	switchTab("Info")
 
-	-- ============================================================
-	-- ПЛАВНОЕ ПОЯВЛЕНИЕ МЕНЮ + УДАЛЕНИЕ ЗАГРУЗКИ
-	-- ============================================================
+	-- Плавное появление окна
 	window.Visible = true
-
-	-- Плавное скрытие загрузочного экрана
-	TweenService:Create(loadFrame, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(loadStroke, TweenInfo.new(0.35), {Transparency = 1}):Play()
-	TweenService:Create(loadBarBg, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(loadBarFill, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
-	for _, child in ipairs(loadFrame:GetDescendants()) do
-		if child:IsA("TextLabel") then
-			TweenService:Create(child, TweenInfo.new(0.35), {TextTransparency = 1}):Play()
-		end
-	end
-	task.wait(0.4)
-	if loadGui and loadGui.Parent then loadGui:Destroy() end
-
-	-- Плавное появление меню
 	TweenService:Create(window, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0.5, -windowW/2, 0.5, -windowH/2),
 		BackgroundTransparency = 0,
 	}):Play()
 	TweenService:Create(windowStroke, TweenInfo.new(0.55), {Transparency = 0}):Play()
 
-	print("[VIPMenu] Готово. Конфиг: " .. (hasFileAPI and configPath() or "недоступен"))
-	print("[VIPMenu] Клавиши: Insert / RightCtrl / F1 / RightShift")
+	-- Убираем загрузочный экран
+	TweenService:Create(loadFrame, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
+	for _, child in ipairs(loadFrame:GetDescendants()) do
+		if child:IsA("TextLabel") then
+			TweenService:Create(child, TweenInfo.new(0.35), {TextTransparency = 1}):Play()
+		elseif child:IsA("Frame") or child:IsA("TextButton") then
+			TweenService:Create(child, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
+		elseif child:IsA("UIStroke") then
+			TweenService:Create(child, TweenInfo.new(0.35), {Transparency = 1}):Play()
+		end
+	end
+	task.wait(0.4)
+	if loadGui and loadGui.Parent then loadGui:Destroy() end
+
+	print("[VIPMenu] Готово. Клавиши: Insert / RightCtrl / F1 / RightShift")
 end)
+
+-- ★ Показываем ошибку если скрипт упал
+if not _ok then
+	warn("[VIPMenu] ОШИБКА: " .. tostring(_err))
+end
