@@ -85,28 +85,19 @@ local _ok, _err = pcall(function()
 
 	local function serializeConfig()
 		local data = {
-			flySpeed = flySpeed,
-			walkSpeed = walkSpeedValue,
-			jumpPower = jumpPowerValue,
-			flyFreeSpeed = flyFreeSpeed,
-			magnetDistance = magnetDistance,
-			autoTpKey = autoTpKeyName,
-			autoTpEnabled = autoTpEnabled and "1" or "0",
+			flySpeed = flySpeed, walkSpeed = walkSpeedValue, jumpPower = jumpPowerValue,
+			flyFreeSpeed = flyFreeSpeed, magnetDistance = magnetDistance,
+			autoTpKey = autoTpKeyName, autoTpEnabled = autoTpEnabled and "1" or "0",
 			autoTpAbove = autoTpAbove and "1" or "0",
-			aimbotKey = aimbotKeyName,
-			aimbotEnabled = aimbotEnabled and "1" or "0",
-			aimbotSmoothness = aimbotSmoothness,
-			aimbotRange = aimbotRange,
+			aimbotKey = aimbotKeyName, aimbotEnabled = aimbotEnabled and "1" or "0",
+			aimbotSmoothness = aimbotSmoothness, aimbotRange = aimbotRange,
 			aimbotTeamCheck = aimbotTeamCheck and "1" or "0",
 			aimbotVisibleCheck = aimbotVisibleCheck and "1" or "0",
 			triggerbotEnabled = triggerbotEnabled and "1" or "0",
-			triggerbotRange = triggerbotRange,
-			triggerbotDelay = triggerbotDelay,
+			triggerbotRange = triggerbotRange, triggerbotDelay = triggerbotDelay,
 			magnetAllForwardOffset = magnetAllForwardOffset,
-			magnetAllRadius = magnetAllRadius,
-			magnetAllHoldTime = magnetAllHoldTime,
-			theme = currentTheme,
-			style = currentStyle,
+			magnetAllRadius = magnetAllRadius, magnetAllHoldTime = magnetAllHoldTime,
+			theme = currentTheme, style = currentStyle,
 		}
 		local lines = {"-- VIP Menu Config", "-- by swapper.sk", ""}
 		for k, v in pairs(data) do
@@ -124,10 +115,7 @@ local _ok, _err = pcall(function()
 
 	local function loadConfig()
 		if not hasFileAPI then return false end
-		if not isfile(configPath()) then
-			pcall(saveConfig)
-			return false
-		end
+		if not isfile(configPath()) then pcall(saveConfig); return false end
 		local ok, content = pcall(function() return readfile(configPath()) end)
 		if not ok or not content then return false end
 
@@ -188,8 +176,7 @@ local _ok, _err = pcall(function()
 			stroke = Color3.fromRGB(48, 48, 60), header = Color3.fromRGB(40, 40, 55),
 			headerText = Color3.fromRGB(180, 180, 220), barBg = Color3.fromRGB(18, 18, 24),
 			success = Color3.fromRGB(120, 255, 150), danger = Color3.fromRGB(255, 90, 90),
-			warn = Color3.fromRGB(255, 200, 80), info = Color3.fromRGB(130, 200, 255),
-			sliderColor = Color3.fromRGB(130, 190, 255),
+			info = Color3.fromRGB(130, 200, 255), sliderColor = Color3.fromRGB(130, 190, 255),
 		},
 		["Белая"] = {
 			bg = Color3.fromRGB(245, 245, 250), panel = Color3.fromRGB(235, 235, 245),
@@ -199,8 +186,7 @@ local _ok, _err = pcall(function()
 			stroke = Color3.fromRGB(200, 200, 215), header = Color3.fromRGB(220, 220, 235),
 			headerText = Color3.fromRGB(60, 60, 90), barBg = Color3.fromRGB(210, 210, 220),
 			success = Color3.fromRGB(60, 180, 100), danger = Color3.fromRGB(220, 60, 60),
-			warn = Color3.fromRGB(230, 160, 30), info = Color3.fromRGB(80, 130, 220),
-			sliderColor = Color3.fromRGB(100, 130, 240),
+			info = Color3.fromRGB(80, 130, 220), sliderColor = Color3.fromRGB(100, 130, 240),
 		},
 		["Космос"] = {
 			bg = Color3.fromRGB(10, 8, 25), panel = Color3.fromRGB(18, 15, 40),
@@ -210,8 +196,7 @@ local _ok, _err = pcall(function()
 			stroke = Color3.fromRGB(80, 50, 150), header = Color3.fromRGB(50, 30, 110),
 			headerText = Color3.fromRGB(200, 170, 255), barBg = Color3.fromRGB(15, 10, 35),
 			success = Color3.fromRGB(150, 120, 255), danger = Color3.fromRGB(255, 100, 200),
-			warn = Color3.fromRGB(255, 200, 255), info = Color3.fromRGB(180, 150, 255),
-			sliderColor = Color3.fromRGB(180, 130, 255),
+			info = Color3.fromRGB(180, 150, 255), sliderColor = Color3.fromRGB(180, 130, 255),
 		},
 		["Снежная"] = {
 			bg = Color3.fromRGB(225, 240, 250), panel = Color3.fromRGB(210, 230, 245),
@@ -221,8 +206,7 @@ local _ok, _err = pcall(function()
 			stroke = Color3.fromRGB(180, 210, 230), header = Color3.fromRGB(190, 220, 240),
 			headerText = Color3.fromRGB(50, 90, 130), barBg = Color3.fromRGB(190, 210, 225),
 			success = Color3.fromRGB(80, 180, 180), danger = Color3.fromRGB(220, 100, 130),
-			warn = Color3.fromRGB(230, 170, 90), info = Color3.fromRGB(100, 170, 230),
-			sliderColor = Color3.fromRGB(100, 170, 230),
+			info = Color3.fromRGB(100, 170, 230), sliderColor = Color3.fromRGB(100, 170, 230),
 		},
 		["Осенняя"] = {
 			bg = Color3.fromRGB(45, 25, 15), panel = Color3.fromRGB(60, 35, 20),
@@ -232,8 +216,7 @@ local _ok, _err = pcall(function()
 			stroke = Color3.fromRGB(140, 80, 40), header = Color3.fromRGB(110, 60, 30),
 			headerText = Color3.fromRGB(255, 210, 170), barBg = Color3.fromRGB(35, 20, 10),
 			success = Color3.fromRGB(180, 200, 90), danger = Color3.fromRGB(220, 80, 60),
-			warn = Color3.fromRGB(240, 180, 70), info = Color3.fromRGB(230, 160, 90),
-			sliderColor = Color3.fromRGB(230, 160, 90),
+			info = Color3.fromRGB(230, 160, 90), sliderColor = Color3.fromRGB(230, 160, 90),
 		},
 	}
 
@@ -526,11 +509,6 @@ local _ok, _err = pcall(function()
 	scroll.Parent = contentArea
 	scroll.ZIndex = 11
 
-	local contentLayout = Instance.new("UIListLayout")
-	contentLayout.Padding = UDim.new(0, 6)
-	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	contentLayout.Parent = scroll
-
 	-- Вкладки
 	local tabs = {}
 	local activeTab = nil
@@ -608,6 +586,7 @@ local _ok, _err = pcall(function()
 
 	-- ===== Компоненты =====
 
+	-- ★ ИСПРАВЛЕНО: body.LayoutOrder = 2
 	local function createSection(parent, text, collapsible)
 		local wrapper = Instance.new("Frame")
 		wrapper.Size = UDim2.new(1, 0, 0, 0)
@@ -641,7 +620,7 @@ local _ok, _err = pcall(function()
 		local body = Instance.new("Frame")
 		body.Size = UDim2.new(1, 0, 0, 0)
 		body.BackgroundTransparency = 1
-		body.LayoutOrder = 2
+		body.LayoutOrder = 2   -- ★★★ ФИКС — body всегда под header
 		body.Parent = wrapper
 		body.ZIndex = 11
 		body.AutomaticSize = Enum.AutomaticSize.Y
@@ -1350,761 +1329,4 @@ local _ok, _err = pcall(function()
 			{key = Enum.KeyCode.R, name = "R"},
 			{key = Enum.KeyCode.F, name = "F"},
 			{key = Enum.KeyCode.G, name = "G"},
-			{key = Enum.KeyCode.T, name = "T"},
-			{key = Enum.KeyCode.X, name = "X"},
-			{key = Enum.KeyCode.C, name = "C"},
-		}
-	)
-
-	local combatTrigger = createSection(combatPage, "🔫  TRIGGERBOT", true)
-
-	local triggerbotToggle = createToggle(combatTrigger, "🔫  Triggerbot", triggerbotEnabled, function(state)
-		triggerbotEnabled = state
-		saveConfig()
-	end)
-
-	local triggerbotRangeSlider = createSlider(combatTrigger, "📏  Радиус", triggerbotRange, 10, 200, 5, THEMES[currentTheme].sliderColor)
-	sliderRefs[triggerbotRangeSlider].onChanged = function(v) triggerbotRange = v; saveConfig() end
-
-	local triggerbotDelaySlider = createSlider(combatTrigger, "⏱  Задержка", triggerbotDelay, 0.05, 1, 0.05, THEMES[currentTheme].sliderColor, true)
-	sliderRefs[triggerbotDelaySlider].onChanged = function(v) triggerbotDelay = v; saveConfig() end
-
-	local combatMagnetAll = createSection(combatPage, "🌀  MAGNET ALL", true)
-
-	local magnetAllToggle = createToggle(combatMagnetAll, "🌀  Magnet All", false, function(state)
-		magnetAllEnabled = state
-		if state then
-			startMagnetAll()
-		else
-			stopMagnetAll()
-		end
-	end)
-
-	local magnetAllOffsetSlider = createSlider(combatMagnetAll, "📍  Вперёд", magnetAllForwardOffset, 3, 60, 2, THEMES[currentTheme].sliderColor)
-	sliderRefs[magnetAllOffsetSlider].onChanged = function(v) magnetAllForwardOffset = v; saveConfig() end
-
-	local magnetAllRadiusSlider = createSlider(combatMagnetAll, "📏  Радиус", magnetAllRadius, 10, 500, 10, THEMES[currentTheme].sliderColor)
-	sliderRefs[magnetAllRadiusSlider].onChanged = function(v) magnetAllRadius = v; saveConfig() end
-
-	local magnetAllDurationSlider = createSlider(combatMagnetAll, "⏱  Длительность (0=∞)", magnetAllHoldTime, 0, 60, 2, THEMES[currentTheme].sliderColor)
-	sliderRefs[magnetAllDurationSlider].onChanged = function(v) magnetAllHoldTime = v; saveConfig() end
-
-	-- ============================================================
-	-- THEME
-	-- ============================================================
-	local themeSection = createSection(themePage, "🎨  ЦВЕТОВАЯ ТЕМА", false)
-
-	local themeHint = Instance.new("TextLabel")
-	themeHint.Size = UDim2.new(1, 0, 0, 24)
-	themeHint.BackgroundColor3 = THEMES[currentTheme].button
-	themeHint.Text = "   Выбери тему:"
-	themeHint.TextColor3 = THEMES[currentTheme].text
-	themeHint.TextSize = 11
-	themeHint.TextXAlignment = Enum.TextXAlignment.Left
-	themeHint.Font = Enum.Font.Gotham
-	themeHint.BorderSizePixel = 0
-	themeHint.Parent = themeSection
-	themeHint.ZIndex = 12
-	registerThemeTarget(themeHint, "button")
-	local thc = Instance.new("UICorner") thc.CornerRadius = UDim.new(0, 6) thc.Parent = themeHint
-
-	local themeButtonRefs = {}
-
-	local function applyTheme(themeName)
-		local t = THEMES[themeName]
-		if not t then return end
-		currentTheme = themeName
-
-		for _, ref in ipairs(themeTargets) do
-			local obj = ref.obj
-			if obj and obj.Parent then
-				local role = ref.role
-				if role == "bg" then obj.BackgroundColor3 = t.bg
-				elseif role == "panel" then obj.BackgroundColor3 = t.panel
-				elseif role == "topBar" then obj.BackgroundColor3 = t.topBar
-				elseif role == "button" then obj.BackgroundColor3 = t.button
-				elseif role == "header" then
-					obj.BackgroundColor3 = t.header
-					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.headerText end
-				elseif role == "text" then
-					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.text end
-				elseif role == "textDim" then
-					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.textDim end
-				elseif role == "barBg" then obj.BackgroundColor3 = t.barBg
-				elseif role == "accent" then obj.BackgroundColor3 = t.accent
-				elseif role == "buttonText" then
-					obj.BackgroundColor3 = t.button
-					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.text end
-				elseif role == "info" then
-					if obj:IsA("TextLabel") or obj:IsA("TextButton") then obj.TextColor3 = t.info end
-				elseif role == "sliderColor" then
-					obj.BackgroundColor3 = t.sliderColor
-					if obj:IsA("TextLabel") then obj.TextColor3 = t.sliderColor end
-				elseif role == "tab" then
-					if activeTab and tabs[activeTab] and tabs[activeTab].btn == obj then
-						obj.BackgroundColor3 = t.accent
-						obj.TextColor3 = Color3.fromRGB(255, 255, 255)
-					else
-						obj.BackgroundColor3 = t.panel
-						obj.TextColor3 = t.textDim
-					end
-				end
-			end
-		end
-
-		windowStroke.Color = t.stroke
-		scroll.ScrollBarImageColor3 = t.textDim
-
-		for _, data in ipairs(tabButtons) do
-			if activeTab and tabs[activeTab] and tabs[activeTab].btn == data.btn then
-				data.btn.BackgroundColor3 = t.accent
-				data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			else
-				data.btn.BackgroundColor3 = t.panel
-				data.btn.TextColor3 = t.textDim
-			end
-		end
-
-		saveConfig()
-	end
-
-	local function applyStyle(styleName)
-		local s = STYLES[styleName]
-		if not s then return end
-		currentStyle = styleName
-
-		windowCorner.CornerRadius = UDim.new(0, s.cornerRadius)
-		topBarCorner.CornerRadius = UDim.new(0, s.cornerRadius)
-		sbC.CornerRadius = UDim.new(0, math.max(0, s.cornerRadius - 2))
-		caC.CornerRadius = UDim.new(0, math.max(0, s.cornerRadius - 2))
-		windowStroke.Thickness = s.strokeThickness
-
-		topBar.Size = UDim2.new(1, 0, 0, s.topBarHeight)
-		topBarCover.Size = UDim2.new(1, 0, 0, s.cornerRadius)
-		topBarCover.Position = UDim2.new(0, 0, 1, -s.cornerRadius)
-
-		sidebar.Size = UDim2.new(0, s.sidebarWidth, 1, -(s.topBarHeight + 12))
-		sidebar.Position = UDim2.new(0, s.padding, 0, s.topBarHeight + 6)
-
-		contentArea.Size = UDim2.new(1, -(s.sidebarWidth + 24), 1, -(s.topBarHeight + 22))
-		contentArea.Position = UDim2.new(0, s.sidebarWidth + s.padding + 8, 0, s.topBarHeight + 12)
-
-		saveConfig()
-	end
-
-	local themePresets = {
-		{name = "Тёмная", color = Color3.fromRGB(30, 30, 40)},
-		{name = "Белая", color = Color3.fromRGB(245, 245, 250)},
-		{name = "Космос", color = Color3.fromRGB(40, 20, 100)},
-		{name = "Снежная", color = Color3.fromRGB(210, 230, 245)},
-		{name = "Осенняя", color = Color3.fromRGB(120, 60, 30)},
-	}
-
-	local themeGrid = Instance.new("Frame")
-	themeGrid.Size = UDim2.new(1, 0, 0, 130)
-	themeGrid.BackgroundTransparency = 1
-	themeGrid.Parent = themeSection
-	themeGrid.ZIndex = 12
-
-	local themeGridLayout = Instance.new("UIGridLayout")
-	themeGridLayout.CellSize = UDim2.new(0.32, -6, 0, 60)
-	themeGridLayout.CellPadding = UDim2.new(0.01, 3, 0, 6)
-	themeGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	themeGridLayout.Parent = themeGrid
-
-	for i, preset in ipairs(themePresets) do
-		local btn = Instance.new("TextButton")
-		btn.BackgroundColor3 = preset.color
-		btn.Text = preset.name
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		btn.TextSize = 12
-		btn.Font = Enum.Font.GothamBold
-		btn.BorderSizePixel = 0
-		btn.AutoButtonColor = false
-		btn.Parent = themeGrid
-		btn.LayoutOrder = i
-		btn.ZIndex = 13
-		local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 8) bc.Parent = btn
-
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(255, 255, 255)
-		stroke.Thickness = 1
-		stroke.Transparency = 0.7
-		stroke.Parent = btn
-		btn.UIStroke = stroke
-
-		btn.MouseButton1Click:Connect(function()
-			applyTheme(preset.name)
-		end)
-
-		themeButtonRefs[preset.name] = btn
-	end
-
-	local styleSection = createSection(themePage, "🖼  СТИЛЬ", false)
-
-	local stylePresets = {
-		{name = "Default", desc = "Стандартный", icon = "🎨"},
-		{name = "Compact", desc = "Компактный", icon = "📐"},
-		{name = "Rounded", desc = "Круглый", icon = "💠"},
-	}
-
-	local styleButtonRefs = {}
-
-	for _, preset in ipairs(stylePresets) do
-		local btn = Instance.new("TextButton")
-		btn.Size = UDim2.new(1, 0, 0, 40)
-		btn.BackgroundColor3 = THEMES[currentTheme].button
-		btn.Text = "   " .. preset.icon .. "  " .. preset.name .. "   —   " .. preset.desc
-		btn.TextColor3 = THEMES[currentTheme].text
-		btn.TextSize = 12
-		btn.TextXAlignment = Enum.TextXAlignment.Left
-		btn.Font = Enum.Font.Gotham
-		btn.BorderSizePixel = 0
-		btn.AutoButtonColor = false
-		btn.Parent = styleSection
-		btn.ZIndex = 12
-		registerThemeTarget(btn, "buttonText")
-		local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = btn
-
-		btn.MouseButton1Click:Connect(function()
-			for _, b in pairs(styleButtonRefs) do
-				b.btn.BackgroundColor3 = THEMES[currentTheme].button
-				b.btn.TextColor3 = THEMES[currentTheme].text
-				b.selected = false
-			end
-			btn.BackgroundColor3 = THEMES[currentTheme].accent
-			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			styleButtonRefs[preset.name].selected = true
-			applyStyle(preset.name)
-		end)
-
-		styleButtonRefs[preset.name] = {btn = btn, selected = (preset.name == "Default")}
-	end
-
-	-- ============================================================
-	-- MISC
-	-- ============================================================
-	local miscSection = createSection(miscPage, "SETTINGS", false)
-	local unloadBtn = createActionBtn(miscSection, "✕  Unload", Color3.fromRGB(230, 80, 80))
-	local saveConfigBtn = createActionBtn(miscSection, "💾  Сохранить конфиг", Color3.fromRGB(80, 180, 120))
-	local loadConfigBtn = createActionBtn(miscSection, "📂  Загрузить конфиг", Color3.fromRGB(80, 130, 230))
-	local resetBtn = createActionBtn(miscSection, "↺  Сбросить", Color3.fromRGB(160, 160, 200))
-
-	-- ============================================================
-	-- ЛОГИКА
-	-- ============================================================
-	local function applyWalkSpeed()
-		local _, _, humanoid = getCharacterParts()
-		if humanoid and not flyEnabled then humanoid.WalkSpeed = walkSpeedValue end
-	end
-
-	local function applyJumpPower()
-		local _, _, humanoid = getCharacterParts()
-		if humanoid and not flyEnabled then humanoid.JumpPower = jumpPowerValue end
-	end
-
-	local function startFlyLoop()
-		if flyConn then flyConn:Disconnect() end
-		flyConn = RunService.RenderStepped:Connect(function(dt)
-			if unloaded or not flyEnabled then return end
-			local char, hrp, humanoid = getCharacterParts()
-			if not char or not hrp or not humanoid then return end
-			humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-			local camera = workspace.CurrentCamera
-			if not camera then return end
-			local moveDir = Vector3.zero
-			local camCF = camera.CFrame
-			if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += camCF.LookVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= camCF.LookVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += camCF.RightVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= camCF.RightVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
-			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir -= Vector3.new(0, 1, 0) end
-			if moveDir.Magnitude > 0 then moveDir = moveDir.Unit end
-			hrp.AssemblyLinearVelocity = moveDir * flyFreeSpeed
-		end)
-	end
-	startFlyLoop()
-
-	function startMagnet(targetPlayer)
-		if not targetPlayer or targetPlayer == player then return end
-		magnetEnabled = true
-		magnetTarget = targetPlayer
-
-		local _, hrp, humanoid = getCharacterParts()
-		if not hrp or not humanoid then return end
-		humanoid.PlatformStand = true
-
-		if magnetConn then magnetConn:Disconnect() end
-		magnetConn = RunService.Heartbeat:Connect(function(dt)
-			if unloaded or not magnetEnabled then return end
-			if not magnetTarget then
-				magnetEnabled = false
-				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
-				return
-			end
-			local myChar, myHrp = getCharacterParts()
-			if not myChar or not myHrp then return end
-			local targetChar = magnetTarget.Character
-			if not targetChar then
-				magnetEnabled = false
-				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
-				return
-			end
-			local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-			if not targetHrp then return end
-			local targetPos = targetHrp.Position - targetHrp.CFrame.LookVector * magnetDistance + Vector3.new(0, 2, 0)
-			local current = myHrp.Position
-			local diff = targetPos - current
-			local dist = diff.Magnitude
-			if dist > 0.5 then
-				local step = math.min(dist, (dist * 8 + 10) * dt)
-				pcall(function()
-					myHrp.CFrame = CFrame.new(current + diff.Unit * step)
-				end)
-			end
-			myHrp.AssemblyLinearVelocity = Vector3.zero
-		end)
-	end
-
-	local function doAutoTeleport()
-		if unloaded then return end
-		local sorted = getSortedPlayers()
-		if #sorted == 0 then return end
-		local nearest = sorted[1].player
-		local char = nearest.Character
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		local targetPos
-		if autoTpAbove then
-			targetPos = hrp.Position + Vector3.new(0, 15, 0)
-		else
-			targetPos = hrp.Position - hrp.CFrame.LookVector * 5 + Vector3.new(0, 3, 0)
-		end
-		instantTeleport(targetPos)
-	end
-
-	local function startAimbotLoop()
-		if aimbotConn then aimbotConn:Disconnect() end
-		aimbotConn = RunService.RenderStepped:Connect(function(dt)
-			if unloaded or not aimbotEnabled then return end
-			if not UserInputService:IsKeyDown(aimbotKey) then return end
-			local char, hrp = getCharacterParts()
-			if not char or not hrp then return end
-			local camera = workspace.CurrentCamera
-			if not camera then return end
-			local myPos = camera.CFrame.Position
-			local closest = nil
-			local closestDist = aimbotRange
-			for _, plr in ipairs(Players:GetPlayers()) do
-				if plr ~= player then
-					local skip = false
-					if aimbotTeamCheck and isSameTeam(plr) then skip = true end
-					if not skip then
-						local targetChar = plr.Character
-						if targetChar then
-							local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-							local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-							if targetHrp and targetHum and targetHum.Health > 0 then
-								local dist = (targetHrp.Position - myPos).Magnitude
-								if dist < closestDist then
-									if aimbotVisibleCheck then
-										local rayParams = RaycastParams.new()
-										rayParams.FilterType = Enum.RaycastFilterType.Exclude
-										rayParams.FilterDescendantsInstances = {char, targetChar}
-										local result = workspace:Raycast(myPos, targetHrp.Position - myPos, rayParams)
-										if result then skip = true end
-									end
-									if not skip then
-										closest = {player = plr, hrp = targetHrp, dist = dist}
-										closestDist = dist
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-			if closest then
-				local targetPos = closest.hrp.Position
-				local currentCF = camera.CFrame
-				local targetCF = CFrame.new(currentCF.Position, targetPos)
-				pcall(function()
-					camera.CFrame = currentCF:Lerp(targetCF, 1 - aimbotSmoothness)
-				end)
-			end
-		end)
-	end
-	startAimbotLoop()
-
-	local function startTriggerbotLoop()
-		if triggerbotConn then triggerbotConn:Disconnect() end
-		triggerbotConn = RunService.Heartbeat:Connect(function(dt)
-			if unloaded or not triggerbotEnabled then return end
-			local now = os.clock()
-			if now - triggerbotLastShot < triggerbotDelay then return end
-			local char, hrp = getCharacterParts()
-			if not char or not hrp then return end
-			local camera = workspace.CurrentCamera
-			if not camera then return end
-			local myPos = camera.CFrame.Position
-			local targetFound = false
-			for _, plr in ipairs(Players:GetPlayers()) do
-				if plr ~= player then
-					local targetChar = plr.Character
-					if targetChar then
-						local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-						local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-						if targetHrp and targetHum and targetHum.Health > 0 then
-							local dist = (targetHrp.Position - myPos).Magnitude
-							if dist < triggerbotRange then
-								local dirToTarget = (targetHrp.Position - myPos).Unit
-								local lookDir = camera.CFrame.LookVector
-								local dot = dirToTarget:Dot(lookDir)
-								if dot > 0.95 then targetFound = true; break end
-							end
-						end
-					end
-				end
-			end
-			if targetFound then
-				triggerbotLastShot = now
-				local tool = char:FindFirstChildOfClass("Tool")
-				if tool then pcall(function() tool:Activate() end) end
-			end
-		end)
-	end
-	startTriggerbotLoop()
-
-	local magnetAllEndTime = 0
-
-	function startMagnetAll()
-		if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
-		magnetAllEndTime = (magnetAllHoldTime > 0) and (os.clock() + magnetAllHoldTime) or 0
-		magnetAllConn = RunService.Heartbeat:Connect(function(dt)
-			if unloaded or not magnetAllEnabled then return end
-			if magnetAllEndTime > 0 and os.clock() >= magnetAllEndTime then
-				magnetAllEnabled = false
-				stopMagnetAll()
-				return
-			end
-			local char, hrp = getCharacterParts()
-			if not char or not hrp then return end
-			local camera = workspace.CurrentCamera
-			if not camera then return end
-			local camCF = camera.CFrame
-			local basePos = camCF.Position + camCF.LookVector * magnetAllForwardOffset
-			for _, plr in ipairs(Players:GetPlayers()) do
-				if plr ~= player then
-					local targetChar = plr.Character
-					if targetChar then
-						local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-						if targetHrp then
-							local dist = (targetHrp.Position - basePos).Magnitude
-							if dist < magnetAllRadius then
-								local angle = (plr.UserId % 360) * math.pi / 180
-								local ringRadius = 3
-								local offset = Vector3.new(math.cos(angle) * ringRadius, 0, math.sin(angle) * ringRadius)
-								local targetPos = basePos + offset + Vector3.new(0, 3, 0)
-								local current = targetHrp.Position
-								local diff = targetPos - current
-								local d = diff.Magnitude
-								if d > 1 then
-									local step = math.min(d, (d * 6 + 8) * dt)
-									pcall(function()
-										targetHrp.CFrame = CFrame.new(current + diff.Unit * step)
-									end)
-								end
-								targetHrp.AssemblyLinearVelocity = Vector3.zero
-							end
-						end
-					end
-				end
-			end
-		end)
-	end
-
-	function stopMagnetAll()
-		magnetAllEnabled = false
-		if magnetAllConn then magnetAllConn:Disconnect() magnetAllConn = nil end
-	end
-
-	local function stepFlyTo(targetPos)
-		local done, cancelled = false, false
-		while not done and not cancelled do
-			if unloaded or teleportCancelled then cancelled = true break end
-			local char, hrp, humanoid = getCharacterParts()
-			if not char or not hrp or not humanoid then cancelled = true break end
-			local current = hrp.Position
-			local diff = targetPos - current
-			local dist = diff.Magnitude
-			if dist < 1 then
-				hrp.CFrame = CFrame.new(targetPos)
-				done = true
-				break
-			end
-			local maxStep = math.min(flySpeed * TP_STEP_INTERVAL, TP_STEP_DISTANCE * 2)
-			local step = math.min(maxStep, dist)
-			hrp.CFrame = CFrame.new(current + diff.Unit * step)
-			hrp.AssemblyLinearVelocity = Vector3.zero
-			pcall(function()
-				if humanoid.FloorMaterial == Enum.Material.Air then
-					humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-				end
-			end)
-			task.wait(TP_STEP_INTERVAL)
-		end
-		return done and not cancelled
-	end
-
-	local function smoothTeleport(targetPosition)
-		if isTeleporting or unloaded then return end
-		isTeleporting = true
-		teleportCancelled = false
-		local char, hrp, humanoid = getCharacterParts()
-		if not char or not hrp or not humanoid then isTeleporting = false return end
-		local currentTool = char:FindFirstChildOfClass("Tool")
-		humanoid.PlatformStand = true
-		humanoid.WalkSpeed = 0
-		humanoid.JumpPower = 0
-		local startPos = hrp.Position
-		local endPos = targetPosition + Vector3.new(0, 3, 0)
-		local liftPos = Vector3.new(startPos.X, startPos.Y + flyHeight, startPos.Z)
-		local dropPos = Vector3.new(endPos.X, endPos.Y + flyHeight, endPos.Z)
-		local function restore()
-			if not flyEnabled then
-				humanoid.PlatformStand = false
-				humanoid.WalkSpeed = walkSpeedValue
-				humanoid.JumpPower = jumpPowerValue
-			end
-			if currentTool then
-				task.wait(0.05)
-				if currentTool.Parent ~= char and currentTool.Parent ~= player:FindFirstChild("Backpack") then
-					currentTool.Parent = player:FindFirstChild("Backpack") or char
-				end
-				humanoid:UnequipTools()
-				task.wait(0.05)
-				humanoid:EquipTool(currentTool)
-			end
-			isTeleporting = false
-		end
-		if not stepFlyTo(liftPos) then restore() return end
-		if not stepFlyTo(dropPos) then restore() return end
-		if not stepFlyTo(endPos) then restore() return end
-		task.wait(0.3)
-		restore()
-	end
-
-	function instantTeleport(targetPosition)
-		if unloaded then return end
-		local char, hrp, humanoid = getCharacterParts()
-		if not char or not hrp or not humanoid then return end
-		pcall(function()
-			hrp.CFrame = CFrame.new(targetPosition + Vector3.new(0, 3, 0))
-			hrp.AssemblyLinearVelocity = Vector3.zero
-		end)
-	end
-
-	-- ============================================================
-	-- КНОПКИ
-	-- ============================================================
-	table.insert(connections, saveBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		savedPosition = hrp.Position
-	end))
-
-	table.insert(connections, tpBtn.MouseButton1Click:Connect(function()
-		if unloaded or isTeleporting then return end
-		if not savedPosition then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		positionBeforeTeleport = hrp.Position
-		smoothTeleport(savedPosition)
-	end))
-
-	table.insert(connections, backBtn.MouseButton1Click:Connect(function()
-		if unloaded or isTeleporting then return end
-		if not positionBeforeTeleport then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		local temp = hrp.Position
-		smoothTeleport(positionBeforeTeleport)
-		positionBeforeTeleport = temp
-	end))
-
-	table.insert(connections, instantSaveBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		savedPosition = hrp.Position
-	end))
-
-	table.insert(connections, instantTpBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		if not savedPosition then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		positionBeforeTeleport = hrp.Position
-		instantTeleport(savedPosition)
-	end))
-
-	table.insert(connections, instantBackBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		if not positionBeforeTeleport then return end
-		local _, hrp = getCharacterParts()
-		if not hrp then return end
-		local temp = hrp.Position
-		instantTeleport(positionBeforeTeleport)
-		positionBeforeTeleport = temp
-	end))
-
-	table.insert(connections, saveConfigBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		saveConfig()
-	end))
-
-	table.insert(connections, loadConfigBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		loadConfig()
-		applyTheme(currentTheme)
-		applyStyle(currentStyle)
-		if sliderRefs[walkSlider] then sliderRefs[walkSlider].setValue(walkSpeedValue) end
-		if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(jumpPowerValue) end
-		if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(flySpeed) end
-		if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(flyFreeSpeed) end
-	end))
-
-	table.insert(connections, resetBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		walkSpeedValue = 16
-		jumpPowerValue = 50
-		flySpeed = 100
-		flyFreeSpeed = 80
-		local _, _, humanoid = getCharacterParts()
-		if humanoid then
-			humanoid.WalkSpeed = 16
-			humanoid.JumpPower = 50
-		end
-		if sliderRefs[walkSlider] then sliderRefs[walkSlider].setValue(16) end
-		if sliderRefs[jumpSlider] then sliderRefs[jumpSlider].setValue(50) end
-		if sliderRefs[flySpeedSlider] then sliderRefs[flySpeedSlider].setValue(100) end
-		if sliderRefs[flyFreeSpeedSlider] then sliderRefs[flyFreeSpeedSlider].setValue(80) end
-		saveConfig()
-	end))
-
-	table.insert(connections, closeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
-	table.insert(connections, minimizeBtn.MouseButton1Click:Connect(function() window.Visible = false end))
-
-	table.insert(connections, unloadBtn.MouseButton1Click:Connect(function()
-		if unloaded then return end
-		unloaded = true
-		flyEnabled = false
-		if flyConn then flyConn:Disconnect() flyConn = nil end
-		stopMagnetAll()
-		if aimbotConn then aimbotConn:Disconnect() aimbotConn = nil end
-		if triggerbotConn then triggerbotConn:Disconnect() triggerbotConn = nil end
-		saveConfig()
-		for _, c in ipairs(connections) do
-			if typeof(c) == "RBXScriptConnection" then c:Disconnect() end
-		end
-		connections = {}
-		if screenGui and screenGui.Parent then screenGui:Destroy() end
-		print("[VIPMenu] Выгружено.")
-	end))
-
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		applyWalkSpeed()
-		applyJumpPower()
-	end)
-	task.wait(0.5)
-	applyWalkSpeed()
-	applyJumpPower()
-
-	refreshPlayersList()
-
-	task.spawn(function()
-		while not unloaded do
-			task.wait(0.5)
-			if unloaded then break end
-			if activeTab == "Players" then
-				refreshPlayersList()
-			end
-		end
-	end)
-
-	-- ===== КЛАВИШИ =====
-	local toggleKeys = {
-		Enum.KeyCode.Insert,
-		Enum.KeyCode.RightControl,
-		Enum.KeyCode.F1,
-		Enum.KeyCode.RightShift,
-	}
-
-	table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if unloaded then return end
-
-		if autoTpEnabled and input.KeyCode == autoTpKey then
-			task.spawn(doAutoTeleport)
-			return
-		end
-
-		if input.KeyCode == Enum.KeyCode.Space then
-			if isTeleporting then teleportCancelled = true end
-			if magnetEnabled then
-				magnetEnabled = false
-				magnetTarget = nil
-				if magnetConn then magnetConn:Disconnect() magnetConn = nil end
-			end
-			return
-		end
-
-		for _, key in ipairs(toggleKeys) do
-			if input.KeyCode == key then
-				window.Visible = not window.Visible
-				return
-			end
-		end
-
-		if gameProcessed then return end
-	end))
-
-	-- Загрузка конфига
-	loadConfig()
-	applyTheme(currentTheme)
-	applyStyle(currentStyle)
-
-	switchTab("Info")
-
-	-- Плавное появление окна
-	window.Visible = true
-	TweenService:Create(window, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, -windowW/2, 0.5, -windowH/2),
-		BackgroundTransparency = 0,
-	}):Play()
-	TweenService:Create(windowStroke, TweenInfo.new(0.55), {Transparency = 0}):Play()
-
-	-- Убираем загрузочный экран
-	TweenService:Create(loadFrame, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
-	for _, child in ipairs(loadFrame:GetDescendants()) do
-		if child:IsA("TextLabel") then
-			TweenService:Create(child, TweenInfo.new(0.35), {TextTransparency = 1}):Play()
-		elseif child:IsA("Frame") or child:IsA("TextButton") then
-			TweenService:Create(child, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
-		elseif child:IsA("UIStroke") then
-			TweenService:Create(child, TweenInfo.new(0.35), {Transparency = 1}):Play()
-		end
-	end
-	task.wait(0.4)
-	if loadGui and loadGui.Parent then loadGui:Destroy() end
-
-	print("[VIPMenu] Готово. Клавиши: Insert / RightCtrl / F1 / RightShift")
-end)
-
--- ★ Показываем ошибку если скрипт упал
-if not _ok then
-	warn("[VIPMenu] ОШИБКА: " .. tostring(_err))
-end
+			
