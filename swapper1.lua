@@ -358,10 +358,18 @@ local miscPage = createTab("Misc", "⚙")
 -- Компоненты
 local function createSection(parent, text, collapsible)
 	local wrapper = Instance.new("Frame")
-	wrapper.Size = UDim2.new(1, 0, 0, 0)
+	wrapper.Size = UDim2.new(1, 0, 0, 24)   -- стартовая высота = только заголовок
 	wrapper.BackgroundTransparency = 1
 	wrapper.Parent = parent
 	wrapper.ZIndex = 11
+	wrapper.AutomaticSize = Enum.AutomaticSize.Y   -- ★★★ АВТО-ВЫСОТА
+
+	-- Внутренний layout для wrapper: заголовок + тело друг под другом
+	local wrapperLayout = Instance.new("UIListLayout")
+	wrapperLayout.FillDirection = Enum.FillDirection.Vertical
+	wrapperLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	wrapperLayout.Padding = UDim.new(0, 4)
+	wrapperLayout.Parent = wrapper
 
 	local header = Instance.new("TextButton")
 	header.Size = UDim2.new(1, 0, 0, 24)
@@ -373,16 +381,18 @@ local function createSection(parent, text, collapsible)
 	header.Font = Enum.Font.GothamBold
 	header.BorderSizePixel = 0
 	header.AutoButtonColor = false
+	header.LayoutOrder = 1
 	header.Parent = wrapper
 	header.ZIndex = 12
 	local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 6) hc.Parent = header
 
 	local body = Instance.new("Frame")
 	body.Size = UDim2.new(1, 0, 0, 0)
-	body.Position = UDim2.new(0, 0, 0, 30)
 	body.BackgroundTransparency = 1
+	body.LayoutOrder = 2
 	body.Parent = wrapper
 	body.ZIndex = 11
+	body.AutomaticSize = Enum.AutomaticSize.Y   -- ★★★ АВТО-ВЫСОТА
 
 	local bodyLayout = Instance.new("UIListLayout")
 	bodyLayout.Padding = UDim.new(0, 4)
@@ -391,15 +401,16 @@ local function createSection(parent, text, collapsible)
 
 	local collapsed = false
 
-	local function updateHeight()
-		if collapsed then
-			wrapper.Size = UDim2.new(1, 0, 0, 24)
-			body.Visible = false
-		else
-			wrapper.Size = UDim2.new(1, 0, 0, 30 + body.AbsoluteSize.Y)
-			body.Visible = true
-		end
+	if collapsible then
+		header.MouseButton1Click:Connect(function()
+			collapsed = not collapsed
+			header.Text = "  " .. text .. (collapsed and "  ▶" or "  ▼")
+			body.Visible = not collapsed
+		end)
 	end
+
+	return body
+end
 
 	body.ChildAdded:Connect(function() task.wait() updateHeight() end)
 	body.ChildRemoved:Connect(function() task.wait() updateHeight() end)
